@@ -1,0 +1,92 @@
+***MISSION.txt***
+
+PURPOSE
+
+In this assignment, you’ll be combining the theoretical FLAT work you’ve been doing in class and workshop with your knowledge of C programming gleaned from completing the previous two lab assignments. As this is your first 2-week programming assignment, you will also be asked to turn in a PDF writeup, which will be more formal than a simple README text file and contain diagrams, sources, and discussion as necessary. Learning how to create quality writeups will help you develop your technical writing skills and serve you well in future computer science courses. This is also the first assignment you will do which we have inherited from previous course iterations, so you will learn how to read legacy code, figure out what it does, and modify it to do something you want -- a crucial skill in industry!
+
+BACKGROUND AND MISSION
+
+Scanners and parsers are two of the most important components in compilers. A scanner is implemented using a finite automaton; it traverses the input and groups characters into logical tokens. For example, a scanner would turn an input line of “a = 1” into the tokens “a”, “=”, and “1”. A parser uses a context-free grammar to turn those tokens into a parse tree. For example, a parser might turn the above tokens into the following tree:
+
+                                                  Expression
+                                           /         \           \   
+                                    Identifier     Operator    Value
+                                      |                |          |
+                                      a                =          1 
+
+Write a finite-state machine scanner, recursive descent parser, and evaluator (that is, a program that walks the parse tree and actually produces the result of the arithmetic expression) for a list of arithmetic expressions separated by semicolons. It should take its input from a file, and its output (==) could look something like this when it runs:
+
+((4+ 7) -3.00)/4;
+==2.000
+
+5;
+==5.000
+
+4 +
+(25/5)
+;
+==9.000
+
+Your program will need to:
+
+    1. Read the to-be-evaluated expression from an input file, which contains a single (maybe multiline), valid, arithmetic expression. We will NOT test error handling.
+    2. Scan the buffer into tokens.
+    3. Parse the tokens into a valid parse tree representing the expression.
+    3. Evaluate the parse tree and output the result to stdout.
+
+Tokens will be limited to:
+    1. Operands: integer or float. It is okay to assume every number is a float, but keep in mind "%" requires both operands to be integers.
+    2. Operators: addition (+), subtraction (-), multiplication (*), division (/), modulo (%), unary operators (+, -), increment (++), decrement (--). (We will always use parentheses around unary, increment, and decrement operators. If we didn’t, you would need to implement scanner lookahead, which is a pain.)
+    3. Other tokens: dot (.), semicolon (;), parenthesis "(" and ")", white space, tab (\t), newline (\n).
+
+Extra credit ideas:
+    - error handling: Fail gracefully if we see an incorrectly-formed expression.
+    - implement other C operators, eg bit shifts.
+    - support using named variables, function calls, etc.
+    - remove all the legacy code you don't need. Drastically shortening code is a valuable skill in industry, so you may as well get started now.
+    - write a Java compiler.
+
+    If you implement any of these or something else for extra credit, be sure to mention it explicitly in an extra credit section.
+
+
+HOW TO GET STARTED:
+
+# Navigate to this directory on a Unix command-line 
+$ cd /path/to/this/directory 
+# Run the makefile to compile our sample code 
+$ make 
+Read through each file to get a sense of how the project fits together. If you’re feeling overwhelmed, please seek help sooner rather than later! There’s a list of resources at the end.
+
+DESCRIPTION OF FILES:
+
+Before I list all the files, please note that any references to a Java compiler or HTML parser (or any other code UNRELATED to a calculator) are from the legacy code/old project. I removed all the completely unecessary files which used to get handed out with the project and updated the makefile accordingly, but there are still some remnants around. If you feel this is distracting you're more than welcome to use your own code.
+
+char_classes.c/h: Constant names for character classes to simplify switch statements.
+input.txt: A sample input file we give you.
+main.c: Start of execution, calls parser/scanner after doing all the input reading for you.
+makefile: Easy way to compile all the code with dependencies. You should know what this does by now; if you need help understanding it, consult the makefiles from the previous two labs.
+MISSION.txt: This file.
+output.txt: A sample correct output file, using the input file we gave you.
+parser.c/h (MODIFY): Parses your grammar. Drastically shorten and modify this.
+reader.c/h: Reads from stdin into a format consisting of a linked list of lines.
+scanner.c/h (MODIFY): Implements your DFA to chop input up into tokens. Drastically shorten and modify this.
+
+GRADING SCHEME:
+
+Your grade for this assignment will be based 65% on how many of the grader’s test cases your program gets correct, 5% on how well you commented your code, 5% on your README file, and 25% on your writeup. You will receive 10% extra credit if you have made good use of version control. If you want more extra credit, please CLEARLY specify what extra things you have done in your README. Points for commenting your code, README, and extra credit are at the sole discretion of the grader. NOTE: We will grade your code on a Linux machine. Thus, please make sure your code runs on a Linux machine! We are not responsible for code that fails to compile/run on Linux.
+
+HOW TO SUBMIT:
+
+To submit, make a ZIP file containing everything in this directory: 
+
+$ zip -r scan-parse.zip scan-parse
+
+Then go to Blackboard to the CSC 173 Class homepage, navigate to Course Materials, and click on "C Week 3-4". Upload your ZIP file at the link before 11:00PM on Sunday, October 4. Note that we will NOT be accepting any late submissions, so please make sure to submit something to Blackboard before this! Even if your implementation is incomplete, it is better to submit something before the due time than nothing, as you risk getting a 0 for this assignment.
+
+HELP/CONTACT:
+
+Our grad TA, Linfeng Song, will be the one grading this assignment. You can reach him at lsong10@cs.rochester.edu. If you’re confused about something conceptual/in this MISSION file, please email the author at jzhu29@u.rochester.edu. I will set up an FAQ page as necessary. Also feel free to ask the workshop leaders conceptual questions about scanning and parsing and how theoretical DFAs and CFGs connect to them, but remember that workshops are not meant as opportunities to discuss code.
+
+Should you have more questions involved with the code/debugging, I encourage you to come visit the CSUG tutors in Hylan 301. Their schedule is available at http://csug.rochester.edu/ugc/tutoring/. 
+
+This is a tough assignment. Start early.
