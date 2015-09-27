@@ -29,6 +29,8 @@ static void print_location (token_t *tok)
  ********/
 void scan(location_t * loc, token_t * tok)
 {
+    //an enumeration of the different possible states
+    //also initializes "state" to "start," which is 0
     enum {
             start,
             in_identifier,

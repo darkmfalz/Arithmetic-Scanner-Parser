@@ -7,6 +7,9 @@
 int main (int argc, char *argv[]) {
     FILE *fp;
     
+    //presumably some error has occurred
+    //I think exit(1) exits the open file
+    //and returns an error code?
     if (argc < 2) {
         printf("Usage: ./calculator infile.txt\n");
         exit(1);
@@ -17,6 +20,7 @@ int main (int argc, char *argv[]) {
         exit(1);
     }
   
+    //this is in reader.c
     initialize_reader(fp);
     
     // Do scan, parse, evaluate here 
