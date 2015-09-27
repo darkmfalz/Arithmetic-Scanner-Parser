@@ -64,6 +64,12 @@ void initialize_reader(FILE *fp)
 
 void set_to_beginning(location_t *loc)
 {
+    //If you pass in a location -- any arbitrary location
+    //this method will set the location to point to the first
+    //line in the LinkedList of lines, and the first column
+    //in that line
+    //Location, after all, is the current location being read
+    //from the LinkedList
     loc->line = head.next;
     loc->column = 0;
 }
@@ -71,10 +77,17 @@ void set_to_beginning(location_t *loc)
 int get_character(location_t *loc)
 {
     int rtn;
+    //don't return an actual character if the location points 
+    //to a place outside of the line
     if (loc->column >= loc->line->length) {
         return 0;
     }
+    //return is the character at the location, if the location
+    //is a valid position inside the line.
+    //this statement also increments the column in the location.
     rtn = loc->line->data[loc->column++];
+    //If the current location is at the end of the line, then
+    //the location is moved to the start of the next line.
     if (loc->column >= loc->line->length && loc->line->next) {
         loc->line = loc->line->next;
         loc->column = 0;
@@ -84,8 +97,11 @@ int get_character(location_t *loc)
 
 void finalize_reader()
 {
+    //Create a pointer to the first line
     line_t * l = head.next;
 
+    //Iterates through all the lines in the LinkedList
+    //and then clears the lines from memory.
     while (l) {
         line_t * t = l;
         if (l->data)

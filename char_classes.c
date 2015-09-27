@@ -8,6 +8,8 @@
 
 #include "char_classes.h"
 
+//I don't even know. They're some sort of classification of characters
+// but they don't really make a ton of sense.
 const char_class char_classes[128] = {
   END,        /* nul   ^@ */      /* returned by get_character at EOF */
   OTHER,      /* soh   ^A */
