@@ -29,6 +29,9 @@ typedef enum {
 
 typedef struct {
     token_class tc;
+    //This is the location from reader.h -- hence, the location
+    //in the complete LinkedList of lines read from the file.
+    //It is absolute.
     location_t location;
     int length;     /* length of token in characters (may span lines) */
 } token_t;

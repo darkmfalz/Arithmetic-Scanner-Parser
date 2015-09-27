@@ -27,6 +27,15 @@ static void print_location (token_t *tok)
     Modify tok to describe next token of input.
     Update loc to refer to location immediately after tok.
  ********/
+//This method -- or at least what I understand of it -- is
+//designed to read in a token at a location and sort it in,
+//that's all.
+//Here's a thought -- location reads one location AFTER token
+//then appends the character to the token, dependent.
+
+//Some thoughts: we don't need all these character classes
+//Some other thoughts: Understand how scan works in the
+//context of the entire program.
 void scan(location_t * loc, token_t * tok)
 {
     //an enumeration of the different possible states
@@ -104,15 +113,22 @@ void scan(location_t * loc, token_t * tok)
     tok->tc = t;  \
     state = done;
 
+//NOTE: the following code is NOT part of the ACCEPT(t)
     tok->location = *loc;
     tok->length = 0;
 
     while (state != done) {
+        //Points to loc -- but if we update loc, we update loc_save
         location_t loc_save = *loc;
+        //Gets the character, but also updates loc
         int c = get_character(loc);
+        //I guess... we might be adding this character to the token?
         tok->length++;
+        //WAIT A SECOND -- THIS WHOLE SWITCH-CASE IS A DFA. :O
         switch (state) {
+            //If we're in the start state...
             case start:
+                //... find out which character class the character is in
                 switch (char_classes[c]) {
                     case WHITE:
                         state = got_space;
@@ -120,6 +136,7 @@ void scan(location_t * loc, token_t * tok)
                     case EOLN:
                         state = got_nl_space;
                         break;
+                    //?
                     CASE_LETTER:
                         state = in_identifier;
                         break;
@@ -129,6 +146,7 @@ void scan(location_t * loc, token_t * tok)
                     case DIG_0:
                         state = got_0;
                         break;
+                    //?
                     CASE_NZ_DIGIT:
                         state = got_dec;
                         break;
@@ -162,7 +180,9 @@ void scan(location_t * loc, token_t * tok)
                     case STAR:
                         state = got_star;
                         break;
+                    //?
                     case BANG:
+                    //?
                     case PCT:
                     case CARET:
                         state = got_op;
@@ -206,6 +226,7 @@ void scan(location_t * loc, token_t * tok)
                     case END:
                         ACCEPT_REUSE(T_EOF);
                         break;
+                    //?
                     case B_SLASH:
                     case OTHER:
                         /* This will be an error.  Eat as many bogus
@@ -214,9 +235,14 @@ void scan(location_t * loc, token_t * tok)
                         break;
                 }
                 break;
+            //Let's decipher this!
+            //CASE_LETTER brings us here.
+            //Perhaps this is designed to identify the letter?
             case in_identifier:
                 switch (char_classes[c]) {
+                    //?
                     CASE_LETTER:
+                    //?
                     CASE_DEC_DIGIT:
                         break;
                     default:
@@ -259,6 +285,10 @@ void scan(location_t * loc, token_t * tok)
                         break;
                 }
                 break;
+            //This, theoretically, should be unreachable -- state would have to change
+            //outside of a switch statement, which, by current design is, dare I say,
+            //impossible. But, this being a computer program prone to bugs, let's just
+            //say "improbable."
             case done:
                 fprintf(stderr, "scan: unexpected done in switch\n");
                 exit(-1);

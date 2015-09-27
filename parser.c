@@ -136,6 +136,7 @@ static void get_token()
 {
     token_class prev_class = T_SPACE;
     do {
+        //Only instance of scan. Right here.
         scan(&loc, &tok);
         if (tok.tc == T_NL_SPACE && prev_class == T_OLD_COMMENT) {
             /* comment was followed by a newline */

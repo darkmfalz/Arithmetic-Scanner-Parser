@@ -9,7 +9,12 @@
 #include "char_classes.h"
 
 //I don't even know. They're some sort of classification of characters
-// but they don't really make a ton of sense.
+//but they don't really make a ton of sense.
+//Actually, I think that each of these character classes is defined by
+//a constant pulled from the enum in the char_classes.h.
+//That is to say, the array index corresponds to the integer representation
+//of the character and the integer stored in the array from the enum in the
+//header is its "class" -- which is how we tell how it's used.
 const char_class char_classes[128] = {
   END,        /* nul   ^@ */      /* returned by get_character at EOF */
   OTHER,      /* soh   ^A */
