@@ -27,11 +27,9 @@ static void print_location (token_t *tok)
     Modify tok to describe next token of input.
     Update loc to refer to location immediately after tok.
  ********/
-//This method -- or at least what I understand of it -- is
-//designed to read in a token at a location and sort it in,
-//that's all.
-//Here's a thought -- location reads one location AFTER token
-//then appends the character to the token, dependent.
+//This method reads in a new token -- it starts at the
+//current location, then adds new characters so long as
+//the token is unfinished.
 
 //Some thoughts: we don't need all these character classes
 //Some other thoughts: Understand how scan works in the
