@@ -10,16 +10,12 @@
 typedef enum {
     T_EOF, T_SPACE, /* intra-line space (no newline characters) */
     T_NL_SPACE,     /* inter-line space (includes >= 1 newlines) */
-    T_OLD_COMMENT,  /* shash-star delimited */
-    T_NEW_COMMENT,  /* double-slash to end of line */
-                    /* NB: Java manual says newline character is part of
-                           comment, but we do NOT include it here. */
     T_ID_DEC,       /* identifier in its own declaration */
                     /* (not returned by scanner) */
     T_IDENTIFIER,   /* other identifier */
-    T_OPERATOR, T_KWOPERATOR, T_LITERAL,                        //Modify, Java
-    T_LBRACE, T_RBRACE, T_LBRAC, T_RBRAC, T_LPAREN, T_RPAREN,   //Modify, Java
-    T_EQUALS, T_COLON, T_QMARK, T_SEMIC, T_COMMA, T_DOT, T_STAR,//Modify, Java
+    T_OPERATOR, T_KWOPERATOR, T_LITERAL,                                //Modify, Java
+    T_LPAREN, T_RPAREN,                                                 //Modify, Java
+    T_SEMIC, T_DOT                                                      //Modify, Java
 } token_class;
 
 typedef struct {
@@ -28,6 +24,7 @@ typedef struct {
     //in the complete LinkedList of lines read from the file.
     //It is absolute.
     location_t location;
+    //The length indicates how far from the start location the token goes on
     int length;     /* length of token in characters (may span lines) */
 } token_t;
 

@@ -64,16 +64,16 @@ const char_class char_classes[128] = {
   MINUS,      /* - */
   DOT,        /* . */
   SLASH,      /* / */
-  DIG_0,      /* 0 */
-  DIG_1to3,   /* 1 */
-  DIG_1to3,   /* 2 */
-  DIG_1to3,   /* 3 */
-  DIG_4to7,   /* 4 */
-  DIG_4to7,   /* 5 */
-  DIG_4to7,   /* 6 */
-  DIG_4to7,   /* 7 */
-  DIG_89,     /* 8 */
-  DIG_89,     /* 9 */
+  DIG, //DIG_0,      /* 0 */
+  DIG, //DIG_1to3,   /* 1 */
+  DIG, //DIG_1to3,   /* 2 */
+  DIG, //DIG_1to3,   /* 3 */
+  DIG, //DIG_4to7,   /* 4 */
+  DIG, //DIG_4to7,   /* 5 */
+  DIG, //DIG_4to7,   /* 6 */
+  DIG, //DIG_4to7,   /* 7 */
+  DIG, //DIG_89,     /* 8 */
+  DIG, //DIG_89,     /* 9 */
   COLON,      /* : */
   SEMIC,      /* ; */
   L_THAN,     /* < */

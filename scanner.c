@@ -47,12 +47,7 @@ void scan(location_t * loc, token_t * tok)
             done,
         /* numbers: */
             got_dot,
-            got_0,
-            got_0_89,
-            got_oct,
             got_dec,
-            starting_hex,
-            got_hex,
             got_fp_dot,
             starting_exp,
             got_exp_sign,
@@ -60,17 +55,9 @@ void scan(location_t * loc, token_t * tok)
         /* operators: */
             got_plus,
             got_minus,
-            got_amp,
-            got_bar,
-            got_equals,
-            got_l_than,
-            got_l_than_2,
-            got_g_than,
-            got_g_than_2,
-            got_g_than_3,
             got_star,
             got_slash,
-            got_op
+            got_pct
     } state = start;
 
 /* Standard way to recognize a token: put back lookahead character that
@@ -94,8 +81,9 @@ void scan(location_t * loc, token_t * tok)
 
     while (state != done) {
         //Points to loc -- but if we update loc, we update loc_save
+        //Doesn't this mean that the location is the LAST character of the token?
         location_t loc_save = *loc;
-        //Gets the character, but also updates loc
+        //Gets the character, but also updates loc by incrementing it
         int c = get_character(loc);
         //I guess... we might be adding this character to the token?
         tok->length++;
@@ -118,46 +106,23 @@ void scan(location_t * loc, token_t * tok)
                     case DOT:
                         state = got_dot;
                         break;
-                    case DIG_0:
-                        state = got_0;
-                        break;
-                    //?
-                    /*CASE_NZ_DIGIT:
+                    case DIG:
                         state = got_dec;
-                        break;*/
+                        break;
                     case PLUS:
                         state = got_plus;
                         break;
                     case MINUS:
                         state = got_minus;
                         break;
-                    case AMP:
-                        state = got_amp;
-                        break;
-                    case BAR:
-                        state = got_bar;
-                        break;
-                    case EQUALS:
-                        state = got_equals;
-                        break;
-                    case L_THAN:
-                        state = got_l_than;
-                        break;
-                    case G_THAN:
-                        state = got_g_than;
-                        break;
                     case STAR:
                         state = got_star;
                         break;
-                    //?
-                    case BANG:
-                    //?
                     case PCT:
-                    case CARET:
-                        state = got_op;
+                        state = got_pct;
                         break;
-                    case TILDE:
-                        ACCEPT(T_OPERATOR);
+                    case SLASH:
+                        state = got_slash;
                         break;
                     case LPAREN:
                         ACCEPT(T_LPAREN);
@@ -165,39 +130,12 @@ void scan(location_t * loc, token_t * tok)
                     case RPAREN:
                         ACCEPT(T_RPAREN);
                         break;
-                    case LBRAC:
-                        ACCEPT(T_LBRAC);
-                        break;
-                    case COMMA:
-                        ACCEPT(T_COMMA);
-                        break;
                     case SEMIC:
                         ACCEPT(T_SEMIC);
-                        break;
-                    case QMARK:
-                        ACCEPT(T_QMARK);
-                        break;
-                    case COLON:
-                        ACCEPT(T_COLON);
-                        break;
-                    case RBRAC:
-                        ACCEPT(T_RBRAC);
-                        break;
-                    case LBRACE:
-                        ACCEPT(T_LBRACE);
-                        break;
-                    case RBRACE:
-                        ACCEPT(T_RBRACE);
-                        break;
-                    //Edit to take division, instead of just "slash"
-                    case SLASH:
-                        state = got_slash;
                         break;
                     case END:
                         ACCEPT_REUSE(T_EOF);
                         break;
-                    //?
-                    case B_SLASH:
                     case OTHER:
                         /* This will be an error.  Eat as many bogus
                             characters as possible. */
@@ -213,7 +151,7 @@ void scan(location_t * loc, token_t * tok)
                     //?
                     CASE_LETTER:
                     //?
-                    CASE_DEC_DIGIT:
+                    case DIG:
                         break;
                     default:
                         ACCEPT_REUSE(T_IDENTIFIER);
@@ -265,13 +203,12 @@ void scan(location_t * loc, token_t * tok)
                 break;
 
             /* operators: */
+            //What about positive and negative? We want the scanner
+            //to parse the positive and negative signs for me
             case got_plus:
                 switch (char_classes[c]) {
                     case PLUS:
                         ACCEPT(T_OPERATOR);       /* ++ */
-                        break;
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* += */
                         break;
                     default:
                         ACCEPT_REUSE(T_OPERATOR); /* + */
@@ -283,255 +220,44 @@ void scan(location_t * loc, token_t * tok)
                     case MINUS:
                         ACCEPT(T_OPERATOR);       /* -- */
                         break;
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* -= */
-                        break;
                     default:
                         ACCEPT_REUSE(T_OPERATOR); /* - */
                         break;
                 }
                 break;
-            case got_amp:
-                switch (char_classes[c]) {
-                    case AMP:
-                        ACCEPT(T_OPERATOR);       /* && */
-                        break;
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* &= */
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); /* & */
-                        break;
-                }
-                break;
-            case got_bar:
-                switch (char_classes[c]) {
-                    case BAR:
-                        ACCEPT(T_OPERATOR);       /* || */
-                        break;
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* |= */
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); /* | */
-                        break;
-                }
-                break;
-            case got_equals:
-                switch (char_classes[c]) {
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* == */
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_EQUALS);   /* = */
-                        break;
-                }
-                break;
-            case got_l_than:
-                switch (char_classes[c]) {
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* <= */
-                        break;
-                    case L_THAN:
-                        state = got_l_than_2;
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); /* < */
-                        break;
-                }
-                break;
-            case got_l_than_2:
-                switch (char_classes[c]) {
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* <<= */
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); /* << */
-                        break;
-                }
-                break;
-            case got_g_than:
-                switch (char_classes[c]) {
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* >= */
-                        break;
-                    case G_THAN:
-                        state = got_g_than_2;
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); /* > */
-                        break;
-                }
-                break;
-            case got_g_than_2:
-                switch (char_classes[c]) {
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* >>= */
-                        break;
-                    case G_THAN:
-                        state = got_g_than_3;
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); /* >> */
-                        break;
-                }
-                break;
-            case got_g_than_3:
-                switch (char_classes[c]) {
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* >>>= */
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); /* >>> */
-                        break;
-                }
-                break;
             case got_star:
-                switch (char_classes[c]) {
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* *= */
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_STAR);     /* bare op */
-                        break;
-                }
+                ACCEPT_REUSE(T_OPERATOR);       //  * 
                 break;
-
-            case got_op:
-                switch (char_classes[c]) {
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* op= */
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); /* bare op */
-                        break;
-                }
+            case got_slash:
+                ACCEPT_REUSE(T_OPERATOR);       //  /
                 break;
-
+            case got_pct:
+                ACCEPT_REUSE(T_OPERATOR);       //  %
+                break;
             /* numeric literals: */
+            //We assume that a dot means that it's a decimal
             case got_dot:
-                switch (char_classes[c]) {
-                    CASE_DEC_DIGIT:
-                        state = got_fp_dot;
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_DOT);      /* dot */
-                        break;
-                }
-                break;
-            case got_0:
-                switch (char_classes[c]) {
-                    case LET_L:
-                        ACCEPT(T_LITERAL);        /* 0L */
-                        break;
-                    case LET_E:
-                        state = starting_exp;
-                        break;
-                    CASE_LET_DF:
-                        ACCEPT(T_LITERAL);        /* 0D or 0F */
-                        break;
-                    case LET_X:
-                        state = starting_hex;
-                        break;
-                    CASE_OCT_DIGIT:
-                        state = got_oct;
-                        break;
-                    case DIG_89:
-                        state = got_0_89;
-                        break;
-                    case DOT:
-                        state = got_fp_dot;
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_LITERAL);  /* 0 */
-                        break;
-                }
-                break;
-            case got_0_89:
-                switch (char_classes[c]) {
-                    CASE_DEC_DIGIT:
-                        break;  /* stay put */
-                    case DOT:
-                        state = got_fp_dot;
-                        break;
-                    case LET_E:
-                        state = starting_exp;
-                        break;
-                    CASE_LET_DF:
-                        ACCEPT(T_LITERAL);        /* FP w/ suffix */
-                        break;
-                    default:
-                        fprintf(stderr, "Invalid decimal literal");
-                        print_location(tok);
-                        ACCEPT_REUSE(T_LITERAL);  /* punt */
-                        break;
-                }
-                break;
-            case got_oct:
-                switch (char_classes[c]) {
-                    CASE_OCT_DIGIT:
-                        break;  /* stay put */
-                    case LET_L:
-                    CASE_LET_DF:
-                        ACCEPT(T_LITERAL);        /* int or FP w/ suffix */
-                        break;
-                    case LET_E:
-                        state = starting_exp;
-                        break;
-                    case DOT:
-                        state = got_fp_dot;
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_LITERAL);  /* octal integer */
-                        break;
-                }
+                state = got_fp_dot;
                 break;
             case got_dec:
                 switch (char_classes[c]) {
-                    CASE_DEC_DIGIT:
+                    case DIG:
                         break;  /* stay put */
                     case DOT:
                         state = got_fp_dot;
                         break;
-                    case LET_E:
+                    /*case LET_E:
                         state = starting_exp;
-                        break;
+                        break;*/
                     default:
                         ACCEPT_REUSE(T_LITERAL);  /* decimal integer */
                         break;
                 }
                 break;
-            case starting_hex:
-                switch (char_classes[c]) {
-                    CASE_HEX_DIGIT:
-                        state = got_hex;
-                        break;
-                    default:
-                        fprintf(stderr, "Invalid hexadecimal literal");
-                        print_location(tok);
-                        ACCEPT_REUSE(T_LITERAL);  /* punt */
-                        break;
-                }
-                break;
-            case got_hex:
-                switch (char_classes[c]) {
-                    CASE_HEX_DIGIT:
-                        break;  /* stay put */
-                    case LET_L:
-                        ACCEPT(T_LITERAL);        /* hex w/ suffix */
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_LITERAL);
-                        break;                  /* hexadecimal integer */
-                }
-                break;
             case got_fp_dot:
                 switch (char_classes[c]) {
-                    CASE_DEC_DIGIT:
+                    case DIG:
                         break;  /* stay put */
-                    CASE_LET_DF:
-                        ACCEPT(T_LITERAL);        /* fp w/ suffix */
-                        break;
                     case LET_E:
                         state = starting_exp;
                         break;
@@ -540,9 +266,10 @@ void scan(location_t * loc, token_t * tok)
                         break;
                 }
                 break;
-            case starting_exp:
+            //EDIT
+            /*case starting_exp:
                 switch (char_classes[c]) {
-                    CASE_DEC_DIGIT:
+                    case DIG:
                         state = got_fp_exp;
                         break;
                     CASE_SIGN:
@@ -551,7 +278,7 @@ void scan(location_t * loc, token_t * tok)
                     default:
                         fprintf(stderr, "Invalid floating point literal");
                         print_location(tok);
-                        ACCEPT_REUSE(T_LITERAL);  /* punt */
+                        ACCEPT_REUSE(T_LITERAL);    //punt
                         break;
                 }
                 break;
@@ -563,40 +290,22 @@ void scan(location_t * loc, token_t * tok)
                     default:
                         fprintf(stderr, "Invalid floating point literal");
                         print_location(tok);
-                        ACCEPT_REUSE(T_LITERAL);  /* punt */
+                        ACCEPT_REUSE(T_LITERAL);  // punt
                         break;
                 }
                 break;
             case got_fp_exp:
                 switch (char_classes[c]) {
                     CASE_DEC_DIGIT:
-                        break;  /* stay put */
+                        break;  //stay put
                     CASE_LET_DF:
-                        ACCEPT(T_LITERAL);        /* fp w/ suffix */
+                        ACCEPT(T_LITERAL);        // fp w/ suffix
                         break;
                     default:
-                        ACCEPT_REUSE(T_LITERAL);  /* fp */
+                        ACCEPT_REUSE(T_LITERAL);  // fp
                         break;
                 }
-                break;
-
-            /* SLASH -- EDIT TO DO DIVISION, LOOK AT OPERATORS: */
-            case got_slash:
-                switch (char_classes[c]) {
-                    case STAR:
-                        state = in_old_comment;
-                        break;
-                    case SLASH:
-                        state = in_new_comment;
-                        break;
-                    case EQUALS:
-                        ACCEPT(T_OPERATOR);       /* /= */
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); /* / */
-                        break;
-                }
-                break;
+                break;*/
         }
     }
 }

@@ -21,10 +21,11 @@ typedef enum {
     LET_X,      /* Xx     */
     LET_OTHER,  /* GHIJK MNOPQRSTUVW YZ ghijk m opq s vw yz _ $ */
 
-    DIG_0,      /* 0      */
-    DIG_1to3,   /* 123    */
-    DIG_4to7,   /* 4567   */
-    DIG_89,     /* 89     */
+    /*DIG_0,      // 0 
+    DIG_1to3,   // 123    
+    DIG_4to7,   // 4567
+    DIG_89,     // 89     */
+    DIG,        //The decimal digit
 
     WHITE,      /* space, tab, or form feed */
     EOLN,       /* newline or carriage return */
