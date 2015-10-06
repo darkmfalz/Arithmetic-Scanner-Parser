@@ -98,7 +98,9 @@ int get_character(location_t *loc)
 
 void move_location_back(location_t *loc, int count){
 
-    for(int i = 0; i < count; i++){
+    int i;
+
+    for(i = 0; i < count; i++){
 
         if(loc->column == 0){
 
