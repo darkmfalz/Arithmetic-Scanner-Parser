@@ -40,7 +40,6 @@ void scan(location_t * loc, token_t * tok)
     //also initializes "state" to "start," which is 0
     enum {
             start,
-            in_identifier,
             got_space,
             got_nl_space,
             got_other,
@@ -57,7 +56,12 @@ void scan(location_t * loc, token_t * tok)
             got_minus,
             got_star,
             got_slash,
-            got_pct
+            got_pct,
+            got_lparen,
+            got_incr,
+            got_decr,
+            got_incr2,
+            got_decr2
     } state = start;
 
 //counts the loops below
@@ -108,10 +112,6 @@ int loopCount = 0;
                     case EOLN:
                         state = got_nl_space;
                         break;
-                    //?
-                    /*CASE_LETTER:
-                        state = in_identifier;
-                        break;*/
                     case DOT:
                         state = got_dot;
                         break;
@@ -134,7 +134,7 @@ int loopCount = 0;
                         state = got_slash;
                         break;
                     case LPAREN:
-                        ACCEPT(T_LPAREN);
+                        state = got_lparen;
                         break;
                     case RPAREN:
                         ACCEPT(T_RPAREN);
@@ -149,18 +149,6 @@ int loopCount = 0;
                         /* This will be an error.  Eat as many bogus
                             characters as possible. */
                         state = got_other;
-                        break;
-                }
-                break;
-            //Let's decipher this!
-            //CASE_LETTER brings us here.
-            //Perhaps this is designed to identify the letter?
-            case in_identifier:
-                switch (char_classes[c]) {
-                    case DIG:
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_IDENTIFIER);
                         break;
                 }
                 break;
@@ -212,25 +200,9 @@ int loopCount = 0;
             //What about positive and negative? We want the scanner
             //to parse the positive and negative signs for me
             case got_plus:
-                /*switch (char_classes[c]) {
-                    case PLUS:
-                        ACCEPT(T_OPERATOR);       // ++ 
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); // +
-                        break;
-                }*/
                 ACCEPT_REUSE(T_OPERATOR);       //  +
                 break;
             case got_minus:
-                /*switch (char_classes[c]) {
-                    case MINUS:
-                        ACCEPT(T_OPERATOR);       // --
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_OPERATOR); // -
-                        break;
-                }*/
                 ACCEPT_REUSE(T_OPERATOR);       //  -
                 break;
             case got_star:
@@ -241,6 +213,59 @@ int loopCount = 0;
                 break;
             case got_pct:
                 ACCEPT_REUSE(T_OPERATOR);       //  %
+                break;
+            case got_lparen:
+                switch(char_classes[c]){
+                    case PLUS:
+                        state = got_incr;
+                        break;
+                    case MINUS:
+                        state = got_decr;
+                        break;
+                    default:
+                        ACCEPT_REUSE(T_LPAREN);
+                        break;
+                }
+                break;
+            case got_incr:
+                switch(char_classes[c]){
+                    case PLUS:
+                        state = got_incr2;
+                        break;
+                    default:
+                        ACCEPT_SHIFT(T_LPAREN, 2);
+                        break;
+                }
+                break;
+            case got_decr:
+                switch(char_classes[c]){
+                    case MINUS:
+                        state = got_decr2;
+                        break;
+                    default:
+                        ACCEPT_SHIFT(T_LPAREN, 2);
+                        break;
+                }
+                break;
+            case got_incr2:
+                switch(char_classes[c]){
+                    case RPAREN:
+                        ACCEPT(T_OPERATOR);
+                        break;
+                    default:
+                        ACCEPT_SHIFT(T_LPAREN, 3);
+                        break;
+                }
+                break;
+            case got_decr2:
+                switch(char_classes[c]){
+                    case RPAREN:
+                        ACCEPT(T_OPERATOR);
+                        break;
+                    default:
+                        ACCEPT_SHIFT(T_LPAREN, 3);
+                        break;
+                }
                 break;
             /* numeric literals: */
             //We assume that a dot means that it's a decimal
