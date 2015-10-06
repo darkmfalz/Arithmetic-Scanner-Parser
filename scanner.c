@@ -64,9 +64,6 @@ void scan(location_t * loc, token_t * tok)
             got_decr2
     } state = start;
 
-//counts the loops below
-int loopCount = 0;
-
 /* Standard way to recognize a token: put back lookahead character that
     isn't part of current token: */
 #define ACCEPT_REUSE(t) \
@@ -93,7 +90,6 @@ int loopCount = 0;
     tok->length = 0;
 
     while (state != done) {
-        loopCount++;
         //Points to loc -- but if we update loc, we update loc_save
         location_t loc_save = *loc;
         //Gets the character, but also updates loc by incrementing it
