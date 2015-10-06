@@ -60,12 +60,21 @@ void scan(location_t * loc, token_t * tok)
             got_pct
     } state = start;
 
+//counts the loops below
+int loopCount = 0;
+
 /* Standard way to recognize a token: put back lookahead character that
     isn't part of current token: */
 #define ACCEPT_REUSE(t) \
     *loc = loc_save;    \
     tok->length--;      \
     tok->tc = t;        \
+    state = done;
+
+#define ACCEPT_SHIFT(t, i)          \
+    move_location_back(*loc, i);    \
+    tok->length = tok->length - i;  \
+    tok->tc = t;                    \
     state = done;
 
 /* Shortcut to eliminate final states with no out transitions: go
@@ -80,8 +89,8 @@ void scan(location_t * loc, token_t * tok)
     tok->length = 0;
 
     while (state != done) {
+        loopCount++;
         //Points to loc -- but if we update loc, we update loc_save
-        //Doesn't this mean that the location is the LAST character of the token?
         location_t loc_save = *loc;
         //Gets the character, but also updates loc by incrementing it
         int c = get_character(loc);
@@ -148,9 +157,6 @@ void scan(location_t * loc, token_t * tok)
             //Perhaps this is designed to identify the letter?
             case in_identifier:
                 switch (char_classes[c]) {
-                    //?
-                    CASE_LETTER:
-                    //?
                     case DIG:
                         break;
                     default:
@@ -206,24 +212,26 @@ void scan(location_t * loc, token_t * tok)
             //What about positive and negative? We want the scanner
             //to parse the positive and negative signs for me
             case got_plus:
-                switch (char_classes[c]) {
+                /*switch (char_classes[c]) {
                     case PLUS:
-                        ACCEPT(T_OPERATOR);       /* ++ */
+                        ACCEPT(T_OPERATOR);       // ++ 
                         break;
                     default:
-                        ACCEPT_REUSE(T_OPERATOR); /* + */
+                        ACCEPT_REUSE(T_OPERATOR); // +
                         break;
-                }
+                }*/
+                ACCEPT_REUSE(T_OPERATOR);       //  +
                 break;
             case got_minus:
-                switch (char_classes[c]) {
+                /*switch (char_classes[c]) {
                     case MINUS:
-                        ACCEPT(T_OPERATOR);       /* -- */
+                        ACCEPT(T_OPERATOR);       // --
                         break;
                     default:
-                        ACCEPT_REUSE(T_OPERATOR); /* - */
+                        ACCEPT_REUSE(T_OPERATOR); // -
                         break;
-                }
+                }*/
+                ACCEPT_REUSE(T_OPERATOR);       //  -
                 break;
             case got_star:
                 ACCEPT_REUSE(T_OPERATOR);       //  * 
@@ -258,54 +266,11 @@ void scan(location_t * loc, token_t * tok)
                 switch (char_classes[c]) {
                     case DIG:
                         break;  /* stay put */
-                    case LET_E:
-                        state = starting_exp;
-                        break;
                     default:
                         ACCEPT_REUSE(T_LITERAL);  /* fp */
                         break;
                 }
                 break;
-            //EDIT
-            /*case starting_exp:
-                switch (char_classes[c]) {
-                    case DIG:
-                        state = got_fp_exp;
-                        break;
-                    CASE_SIGN:
-                        state = got_exp_sign;
-                        break;
-                    default:
-                        fprintf(stderr, "Invalid floating point literal");
-                        print_location(tok);
-                        ACCEPT_REUSE(T_LITERAL);    //punt
-                        break;
-                }
-                break;
-            case got_exp_sign:
-                switch (char_classes[c]) {
-                    CASE_DEC_DIGIT:
-                        state = got_fp_exp;
-                        break;
-                    default:
-                        fprintf(stderr, "Invalid floating point literal");
-                        print_location(tok);
-                        ACCEPT_REUSE(T_LITERAL);  // punt
-                        break;
-                }
-                break;
-            case got_fp_exp:
-                switch (char_classes[c]) {
-                    CASE_DEC_DIGIT:
-                        break;  //stay put
-                    CASE_LET_DF:
-                        ACCEPT(T_LITERAL);        // fp w/ suffix
-                        break;
-                    default:
-                        ACCEPT_REUSE(T_LITERAL);  // fp
-                        break;
-                }
-                break;*/
         }
     }
 }
