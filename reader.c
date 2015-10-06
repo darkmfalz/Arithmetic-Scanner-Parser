@@ -96,13 +96,19 @@ int get_character(location_t *loc)
     return rtn;
 }
 
-int move_location_back(location_t *loc, int count){
+void move_location_back(location_t *loc, int count){
 
     for(int i = 0; i < count; i++){
 
         if(loc->column == 0){
 
+            loc->line = loc->line->prev;
+            loc->column = loc->line->length - 1;
 
+        }
+        else{
+
+            loc->column--;
 
         }
 

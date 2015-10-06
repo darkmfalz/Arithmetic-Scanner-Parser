@@ -27,6 +27,7 @@ int get_character(location_t *loc);
     /* Return EOF if there are no more characters.
         Else return character at specified location, and advance loc to
         next character of input. */
+void move_location_back(location_t *loc, int count)
 void finalize_reader();
     /* discard buffered input */
 
