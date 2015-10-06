@@ -11,6 +11,7 @@ typedef struct line {
     int line_num;
     int length; /* number of non-NUL characters == index of trailing NUL */
     struct line * next;
+    struct line * prev;
 } line_t;
 
 typedef struct {

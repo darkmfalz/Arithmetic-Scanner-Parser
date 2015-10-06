@@ -50,6 +50,7 @@ void initialize_reader(FILE *fp)
         }
         //Attach the tail to the LinkedList
         tail->next = 0;
+        tail->prev = old_tail;
         old_tail->next = tail;
     }
 
@@ -93,6 +94,20 @@ int get_character(location_t *loc)
         loc->column = 0;
     }
     return rtn;
+}
+
+int move_location_back(location_t *loc, int count){
+
+    for(int i = 0; i < count; i++){
+
+        if(loc->column == 0){
+
+
+
+        }
+
+    }
+
 }
 
 void finalize_reader()
