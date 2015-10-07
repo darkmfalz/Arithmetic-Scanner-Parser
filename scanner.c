@@ -48,9 +48,6 @@ void scan(location_t * loc, token_t * tok)
             got_dot,
             got_dec,
             got_fp_dot,
-            starting_exp,
-            got_exp_sign,
-            got_fp_exp,
         /* operators: */
             got_plus,
             got_minus,
@@ -73,7 +70,7 @@ void scan(location_t * loc, token_t * tok)
     state = done;
 
 #define ACCEPT_SHIFT(t, i)          \
-    move_location_back(*loc, i);    \
+    move_location_back(loc, i);    \
     tok->length = tok->length - i;  \
     tok->tc = t;                    \
     state = done;
@@ -144,6 +141,9 @@ void scan(location_t * loc, token_t * tok)
                     case OTHER:
                         /* This will be an error.  Eat as many bogus
                             characters as possible. */
+                        state = got_other;
+                        break;
+                    default:
                         state = got_other;
                         break;
                 }
@@ -228,6 +228,9 @@ void scan(location_t * loc, token_t * tok)
                     case PLUS:
                         state = got_incr2;
                         break;
+                    case RPAREN:
+                        ACCEPT(T_UNARY);
+                        break;
                     default:
                         ACCEPT_SHIFT(T_LPAREN, 2);
                         break;
@@ -238,6 +241,9 @@ void scan(location_t * loc, token_t * tok)
                     case MINUS:
                         state = got_decr2;
                         break;
+                    case RPAREN:
+                        ACCEPT(T_UNARY);
+                        break;
                     default:
                         ACCEPT_SHIFT(T_LPAREN, 2);
                         break;
@@ -246,7 +252,7 @@ void scan(location_t * loc, token_t * tok)
             case got_incr2:
                 switch(char_classes[c]){
                     case RPAREN:
-                        ACCEPT(T_OPERATOR);
+                        ACCEPT(T_INCREMENT);
                         break;
                     default:
                         ACCEPT_SHIFT(T_LPAREN, 3);
@@ -256,7 +262,7 @@ void scan(location_t * loc, token_t * tok)
             case got_decr2:
                 switch(char_classes[c]){
                     case RPAREN:
-                        ACCEPT(T_OPERATOR);
+                        ACCEPT(T_INCREMENT);
                         break;
                     default:
                         ACCEPT_SHIFT(T_LPAREN, 3);

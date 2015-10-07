@@ -10,12 +10,10 @@
 typedef enum {
     T_EOF, T_SPACE, /* intra-line space (no newline characters) */
     T_NL_SPACE,     /* inter-line space (includes >= 1 newlines) */
-    T_ID_DEC,       /* identifier in its own declaration */
-                    /* (not returned by scanner) */
-    T_IDENTIFIER,   /* other identifier */
-    T_OPERATOR, T_KWOPERATOR, T_LITERAL,                                //Modify, Java
-    T_LPAREN, T_RPAREN,                                                 //Modify, Java
-    T_SEMIC, T_DOT                                                      //Modify, Java
+    T_UNARY, T_INCREMENT,       //My own personal token types
+    T_OPERATOR, T_LITERAL,                                             
+    T_LPAREN, T_RPAREN,                                                
+    T_SEMIC, T_DOT                                                      
 } token_class;
 
 typedef struct {
