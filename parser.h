@@ -39,17 +39,24 @@ typedef enum {
 
 typedef struct node {
 
-	char * label;
+	int label; //syntactic groups should be t_SEMIC + syntactic_group_class
 	struct node * leftChild;
 	struct node * rightSibling;
 
 } node_t;
 
-typedef struct tree {
+typedef struct s_node { //for stacks
 
-	node_t root;
+	int label;
+	struct s_node * next;
 
-} tree_t;
+} s_node_t;
+
+typedef struct stack {
+
+	s_node_t head;
+	
+} stack_t;
 
 void parse();
     /* Scan source, identify structure, and print appropriately. */
