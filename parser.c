@@ -63,12 +63,12 @@ void parse()
     //These macros will come in handy when we have to re-initialize
     //the stack and tree between statements.
     #define INIT_STACK()                    \
-        deleteStack(stack);                 \
+        deleteStack(*stack);                \
         *stack = malloc(sizeof(stack_t));   \
         push(stack, s_EXPRESSION);
 
     #define INIT_TREE()                             \
-        deleteTree(parseTree);                      \
+        deleteTree(*parseTree);                     \
         *parseTree = malloc(sizeof(tree_t));        \
         parseTree->root = malloc(sizeof(node_t));   \
         parseTree->root->label = s_EXPRESSION;      \
@@ -82,11 +82,29 @@ void parse()
         
         if(tok.tc != T_SEMIC){
 
-            int i;
-        
-            //Do stuff, then print;
-            for(i = 0; i < tok.length; i++)
-                printf("%c", get_character(&(tok.location)));
+            if(tok.tc != T_EOF && tok.tc != T_SPACE && tok.tc != T_NL_SPACE){
+            
+                char * current = malloc(sizeof(char)*tok.length + 1);
+
+                int i;
+
+                for(i = 0; i < tok.length; i++)
+                    current[i] = get_character(&(tok.location));
+
+                current[i] = '\0';
+                printf("%s", current);
+
+                free(current);
+
+            }
+            else{
+
+                int i;
+                
+                for(i = 0; i < tok.length; i++)
+                    printf("%c", get_character(&(tok.location)));
+
+            }
         
         }
         else
