@@ -25,9 +25,6 @@ static void (*parseTable[t_SEMIC+1][s_INCREMENT+1])(); //Fill input parameters
 static token_t     tok;
 static location_t  loc;
 
-static int indent_level = 0;
-#define    INDENT_WIDTH   4
-
 /********
     A parse error has occurred.  Print error message and halt.
  ********/
@@ -125,8 +122,12 @@ void parse()
         
     }
 
-    deleteStack(*stack);
-    deleteTree(*parseTree);
+    deleteStack(stack);
+    free(stack);
+    stack = NULL;
+    deleteTree(parseTree);
+    free(parseTree);
+    parseTree = NULL;
 
 }
 
@@ -155,8 +156,6 @@ void pop(stack_t *stack){
 }
 
 void deleteStack(stack_t *stack){
-
-    int i;
 
     while(stack->head)
         pop(stack);
