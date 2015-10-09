@@ -74,5 +74,9 @@ void parse();
 //Stack functions
 void push(stack_t *stack, int label);
 void pop(stack_t *stack);
+//delete functions
+void deleteStack(stack_t *stack);
+void deleteTree(tree_t *tree);
+void deleteNode(node_t *node);
 
 #endif

@@ -63,10 +63,12 @@ void parse()
     //These macros will come in handy when we have to re-initialize
     //the stack and tree between statements.
     #define INIT_STACK()                    \
+        deleteStack(stack);                 \
         *stack = malloc(sizeof(stack_t));   \
         push(stack, s_EXPRESSION);
 
     #define INIT_TREE()                             \
+        deleteTree(parseTree);                      \
         *parseTree = malloc(sizeof(tree_t));        \
         parseTree->root = malloc(sizeof(node_t));   \
         parseTree->root->label = s_EXPRESSION;      \
@@ -105,8 +107,41 @@ void push(stack_t *stack, int label){
 
 void pop(stack_t *stack){
 
-    s_node_t* oldHead = stack->head;     
-    stack->head = stack->head->next;
-    free(oldHead);
+    if(stack->head){
+
+        s_node_t* oldHead = stack->head;    
+        stack->head = stack->head->next;
+        free(oldHead);
+
+    }
     
+}
+
+void deleteStack(stack_t *stack){
+
+    while(stack->head)
+        pop(stack);
+
+}
+
+void deleteTree(tree_t *tree){
+
+    deleteNode(tree->root);
+
+}
+
+void deleteNode(node_t *node){
+
+    //Iterates through all the the branches
+    //and then clears the lines from memory.
+    if(node) {
+
+        if(node->leftChild)
+            deleteNode(node->leftChild);
+        if(node->rightSibling)
+            deleteNode(node->rightSibling);
+        free(node);
+
+    }
+
 }
