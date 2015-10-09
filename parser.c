@@ -45,10 +45,13 @@ static void parse_error()
  ********/
 void parse()
 {
+    
     //Calls from reader.c
     //sets the address of loc to be the first character
     //of the first line
     set_to_beginning(&loc);
+    
+    stack_t *stack = malloc(sizeof(stack));
 
     tok.tc = T_LITERAL;
     
@@ -72,16 +75,16 @@ void parse()
 
 }
 
-stack_t push(stack_t *stack, int label){
+void push(stack_t *stack, int label){
     
     s_node_t* oldHead = stack->head;         
-    stack->head = malloc(sizeof(stack_t));  
+    stack->head = malloc(sizeof(s_node_t));  
     stack->head->label = label;                
     stack->head->next = oldHead;
     
 }
 
-stack_t pop(stack_t *stack){
+void pop(stack_t *stack){
     
     stack->head = stack->head->next;
     

@@ -62,7 +62,7 @@ void parse();
     /* Scan source, identify structure, and print appropriately. */
 
 //Stack functions
-stack_t push(stack_t *stack, int label);
-stack_t pop(stack_t *stack);
+void push(stack_t *stack, int label);
+void pop(stack_t *stack);
 
 #endif
