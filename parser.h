@@ -54,11 +54,15 @@ typedef struct s_node { //for stacks
 
 typedef struct stack {
 
-	s_node_t head;
+	s_node_t * head;
 	
 } stack_t;
 
 void parse();
     /* Scan source, identify structure, and print appropriately. */
+
+//Stack functions
+stack_t push(stack_t *stack, int label);
+stack_t pop(stack_t *stack);
 
 #endif

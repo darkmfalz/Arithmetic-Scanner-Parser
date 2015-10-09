@@ -20,25 +20,14 @@
 #include "scanner.h"
 #include "parser.h"
 
-static (*parseTable[t_SEMIC+1][s_INCREMENT+1])(); //Fill input parameters
-static node_t root;
-
-static stack_t stack;
+static void (*parseTable[t_SEMIC+1][s_INCREMENT+1])(); //Fill input parameters
+node_t root;
 
 static token_t     tok;
 static location_t  loc;
 
 static int indent_level = 0;
 #define    INDENT_WIDTH   4
-
-//stack MACROS
-#define POP()  \
-    stack->head = stack->head->next;
-#define PUSH(t)                             \   //t is the label of the s_node
-    s_node_t oldHead = stack->head;         \
-    stack->head = malloc(sizeof(stack_t));  \
-    stack->head->label = t;                 \
-    stack->head->next = oldHead;
 
 /********
     A parse error has occurred.  Print error message and halt.
@@ -81,4 +70,19 @@ void parse()
         
     }
 
+}
+
+stack_t push(stack_t *stack, int label){
+    
+    s_node_t* oldHead = stack->head;         
+    stack->head = malloc(sizeof(stack_t));  
+    stack->head->label = label;                
+    stack->head->next = oldHead;
+    
+}
+
+stack_t pop(stack_t *stack){
+    
+    stack->head = stack->head->next;
+    
 }
