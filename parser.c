@@ -21,7 +21,6 @@
 #include "parser.h"
 
 static void (*parseTable[t_SEMIC+1][s_INCREMENT+1])(); //Fill input parameters
-node_t root;
 
 static token_t     tok;
 static location_t  loc;
@@ -51,7 +50,13 @@ void parse()
     //of the first line
     set_to_beginning(&loc);
     
-    stack_t *stack = malloc(sizeof(stack));
+    stack_t *stack = malloc(sizeof(stack_t));
+    push(stack, s_EXPRESSION);
+
+    tree_t *parseTree = malloc(sizeof(tree_t));
+    parseTree->root = malloc(sizeof(node_t));
+    parseTree->root->label = s_EXPRESSION;
+    parseTree->height++;
 
     tok.tc = T_LITERAL;
     
@@ -85,7 +90,9 @@ void push(stack_t *stack, int label){
 }
 
 void pop(stack_t *stack){
-    
+
+    s_node_t* oldHead = stack->head;     
     stack->head = stack->head->next;
+    free(oldHead);
     
 }

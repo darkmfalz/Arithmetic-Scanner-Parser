@@ -18,6 +18,8 @@ typedef enum {
 	t_SLASH,
 	t_LPAREN,
 	t_RPAREN,
+	t_BANG,
+	t_CARET,
 	t_LITERAL,
 	t_SEMIC
 
@@ -31,9 +33,10 @@ typedef enum {
 	s_TERM,
 	s_TERMTAIL,
 	s_FACTOR,
-	s_FACTORTAIL,
+	s_FACTORHEAD,
 	s_SIGN,
-	s_INCREMENT
+	s_INCREMENT,
+	s_FACTORTAIL
 
 } syntactic_group_class;
 
@@ -44,6 +47,13 @@ typedef struct node {
 	struct node * rightSibling;
 
 } node_t;
+
+typedef struct tree {
+
+	node_t * root;
+	int height;
+
+} tree_t;
 
 typedef struct s_node { //for stacks
 
