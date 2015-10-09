@@ -20,6 +20,8 @@
 #include "scanner.h"
 #include "parser.h"
 
+static (*parseTable[t_SEMIC+1][s_INCREMENT+1])(); //Fill input parameters
+
 static token_t     tok;
 static location_t  loc;
 
