@@ -53,6 +53,9 @@ void parse()
     //Creating the stack
     stack_t *stack = malloc(sizeof(stack_t));
     push(stack, s_EXPRESSION);
+    stack->head = malloc(sizeof(s_node_t));  
+    stack->head->label = s_EXPRESSION;                
+    stack->head->next = NULL;
 
     //Creating the parse tree
     tree_t *parseTree = malloc(sizeof(tree_t));
@@ -62,16 +65,20 @@ void parse()
 
     //These macros will come in handy when we have to re-initialize
     //the stack and tree between statements.
-    #define INIT_STACK()                    \
-        deleteStack(*stack);                \
-        *stack = malloc(sizeof(stack_t));   \
-        push(stack, s_EXPRESSION);
+    #define INIT_STACK()                        \
+        deleteStack(stack);                     \
+        stack = malloc(sizeof(stack_t));        \
+        stack->head = malloc(sizeof(s_node_t)); \ 
+        stack->head->label = s_EXPRESSION;      \          
+        stack->head->next = NULL;               
 
     #define INIT_TREE()                             \
-        deleteTree(*parseTree);                     \
-        *parseTree = malloc(sizeof(tree_t));        \
+        deleteTree(parseTree);                      \
+        parseTree = malloc(sizeof(tree_t));         \
         parseTree->root = malloc(sizeof(node_t));   \
         parseTree->root->label = s_EXPRESSION;      \
+        parseTree->root->leftChild = NULL;          \
+        parseTree->root->rightSibling = NULL;       \
         parseTree->height++;
 
     tok.tc = T_LITERAL;
@@ -107,10 +114,19 @@ void parse()
             }
         
         }
-        else
+        else{
+
             printf(";\n==");
+
+            INIT_STACK();
+            INIT_TREE();
+
+        }
         
     }
+
+    deleteStack(*stack);
+    deleteTree(*parseTree);
 
 }
 
@@ -128,7 +144,10 @@ void pop(stack_t *stack){
     if(stack->head){
 
         s_node_t* oldHead = stack->head;    
-        stack->head = stack->head->next;
+        if(stack->head->next)
+            stack->head = stack->head->next;
+        else
+            stack->head = NULL;
         free(oldHead);
 
     }
@@ -136,6 +155,8 @@ void pop(stack_t *stack){
 }
 
 void deleteStack(stack_t *stack){
+
+    int i;
 
     while(stack->head)
         pop(stack);
