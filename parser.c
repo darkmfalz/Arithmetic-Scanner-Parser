@@ -50,13 +50,27 @@ void parse()
     //of the first line
     set_to_beginning(&loc);
     
+    //Creating the stack
     stack_t *stack = malloc(sizeof(stack_t));
     push(stack, s_EXPRESSION);
 
+    //Creating the parse tree
     tree_t *parseTree = malloc(sizeof(tree_t));
     parseTree->root = malloc(sizeof(node_t));
     parseTree->root->label = s_EXPRESSION;
     parseTree->height++;
+
+    //These macros will come in handy when we have to re-initialize
+    //the stack and tree between statements.
+    #define INIT_STACK()                    \
+        *stack = malloc(sizeof(stack_t));   \
+        push(stack, s_EXPRESSION);
+
+    #define INIT_TREE()                             \
+        *parseTree = malloc(sizeof(tree_t));        \
+        parseTree->root = malloc(sizeof(node_t));   \
+        parseTree->root->label = s_EXPRESSION;      \
+        parseTree->height++;
 
     tok.tc = T_LITERAL;
     
