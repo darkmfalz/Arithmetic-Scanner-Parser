@@ -45,28 +45,27 @@ typedef struct node {
 
 	int label; //syntactic groups should be t_SEMIC + syntactic_group_class
 	int hasChildren;
-	char * data;
+	char * data; //this is for literals
 	struct node * parent;
 	struct node * leftChild;
 	struct node * rightSibling;
 
 } node_t;
 
-int returnType(char * value);
 void addNodeLabel(int label, node_t * parent);
 void addNode(node_t * child, node_t * parent);
 char * advanceInput();
 //productions
-node_t * pExpression(node_t * node, int terminal);
-node_t * pExpTail(node_t * node, int terminal);
-node_t * pPostIncrement(node_t * node, int terminal);
-node_t * pTerm(node_t * node, int terminal);
-node_t * pTermTail(node_t * node, int terminal);
-node_t * pFactor(node_t * node, int terminal);
-node_t * pFactorHead(node_t * node, int terminal);
-node_t * pSign(node_t * node, int terminal);
-node_t * pIncrement(node_t * node, int terminal);
-node_t * pFactorTail(node_t * node, int terminal);
+node_t * pExpression();
+node_t * pExpTail();
+node_t * pPostIncrement();
+node_t * pTerm();
+node_t * pTermTail();
+node_t * pFactor();
+node_t * pFactorHead();
+node_t * pSign();
+node_t * pIncrement();
+node_t * pFactorTail();
 
 void parse();
     /* Scan source, identify structure, and print appropriately. */

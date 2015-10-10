@@ -35,83 +35,6 @@ static void parse_error()
     exit(1);
 }
 
-int returnType(char * value){
-
-    switch(value[0]){
-        case '+':
-            return t_PLUS;
-            break;
-        case '-':
-            return t_MINUS;
-            break;
-        case '(':
-            switch(value[1]){
-                case '+':
-                    switch(value[2]){
-                        case '+':
-                            return t_INCREMENT;
-                            break;
-                        case ')':
-                            return t_PLUS_UNARY;
-                            break;
-                        default:
-                            parse_error();
-                            break;
-                    }
-                    break;
-                case '-':
-                    switch(value[2]){
-                        case '-':
-                            return t_DECREMENT;
-                            break;
-                        case ')':
-                            return t_MINUS_UNARY;
-                            break;
-                        default:
-                            parse_error();
-                            break;
-                    }
-                    break;
-                default:
-                    return t_LPAREN;
-                    break;
-            }
-            break;
-        case '*':
-            return t_STAR;
-            break;
-        case '%':
-            return t_PCT;
-            break;
-        case '/':
-            return t_SLASH;
-            break;
-        case ')':
-            return t_RPAREN;
-            break;
-        case '!':
-            return t_BANG;
-            break;
-        case '^':
-            return t_CARET;
-            break;
-        case ';':
-            return t_SEMIC;
-            break;
-        default:
-            if(tok.tc == T_LITERAL)
-                return t_LITERAL;
-            else
-                parse_error();
-            break;
-    }
-
-    parse_error();
-
-    return -1;
-
-}
-
 void addNodeLabel(int label, node_t * parent){
 
     node_t * child = malloc(sizeof(node_t));
@@ -120,6 +43,7 @@ void addNodeLabel(int label, node_t * parent){
         child->hasChildren = 0;
     else
         child->hasChildren = 1;
+    child->data = NULL;
     child->parent = NULL;
     child->leftChild = NULL;
     child->rightSibling = NULL;
@@ -219,60 +143,70 @@ char * advanceInput(){
 
 }
 
-/*node_t * pExpression(node_t * node, int terminal){
+node_t * pExpression(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_EXPRESSION + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_PLUS:
-            node_t node1 = pTerm(node, terminal);
-            node_t node2 = pExpTail(node, terminal);
+        case t_PLUS:{
+            node_t *node1 = pTerm();
+            node_t *node2 = pExpTail();
             addNode(node1, returnNode);
             addNode(node2, returnNode);
             break;
-        case t_MINUS:
-            node_t node1 = pTerm(node, terminal);
-            node_t node2 = pExpTail(node, terminal);
+        }
+        case t_MINUS:{
+            node_t *node1 = pTerm();
+            node_t *node2 = pExpTail();
             addNode(node1, returnNode);
             addNode(node2, returnNode);
             break;
-        case t_PLUS_UNARY:
-            node_t node1 = pTerm(node, terminal);
-            node_t node2 = pExpTail(node, terminal);
+        }
+        case t_PLUS_UNARY:{
+            node_t *node1 = pTerm();
+            node_t *node2 = pExpTail();
             addNode(node1, returnNode);
             addNode(node2, returnNode);
             break;
-        case t_MINUS_UNARY:
-            node_t node1 = pTerm(node, terminal);
-            node_t node2 = pExpTail(node, terminal);
+        }
+        case t_MINUS_UNARY:{
+            node_t *node1 = pTerm();
+            node_t *node2 = pExpTail();
             addNode(node1, returnNode);
             addNode(node2, returnNode);
             break;
-        case t_INCREMENT:
-            node_t node1 = pTerm(node, terminal);
-            node_t node2 = pExpTail(node, terminal);
+        }
+        case t_INCREMENT:{
+            node_t *node1 = pTerm();
+            node_t *node2 = pExpTail();
             addNode(node1, returnNode);
             addNode(node2, returnNode);
             break;
-        case t_DECREMENT:
-            node_t node1 = pTerm(node, terminal);
-            node_t node2 = pExpTail(node, terminal);
+        }
+        case t_DECREMENT:{
+            node_t *node1 = pTerm();
+            node_t *node2 = pExpTail();
             addNode(node1, returnNode);
             addNode(node2, returnNode);
             break;
-        case t_LPAREN:
-            node_t node1 = pTerm(node, terminal);
-            node_t node2 = pExpTail(node, terminal);
+        }
+        case t_LPAREN:{
+            node_t *node1 = pTerm();
+            node_t *node2 = pExpTail();
             addNode(node1, returnNode);
             addNode(node2, returnNode);
             break;
-        case t_LITERAL:
-            node_t node1 = pTerm(node, terminal);
-            node_t node2 = pExpTail(node, terminal);
+        }
+        case t_LITERAL:{
+            node_t *node1 = pTerm();
+            node_t *node2 = pExpTail();
             addNode(node1, returnNode);
             addNode(node2, returnNode);
             break;
+        }
         default:
             parse_error();
             break;
@@ -282,187 +216,546 @@ char * advanceInput(){
     return returnNode;
 
 }
-node_t * pExpTail(node_t * node, int terminal){
+node_t * pExpTail(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_EXPTAIL + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_PLUS:
-        case t_MINUS:
-        case t_INCREMENT:
-        case t_DECREMENT:
-        case t_SEMIC:
+        case t_PLUS:{
+            advanceInput();
+            addNodeLabel(t_PLUS, returnNode);
+            node_t *node2 = pTerm();
+            node_t *node3 = pExpTail();
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_MINUS:{
+            advanceInput();
+            addNodeLabel(t_MINUS, returnNode);
+            node_t *node2 = pTerm();
+            node_t *node3 = pExpTail();
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_INCREMENT:{
+            node_t *node1 = pPostIncrement();
+            node_t *node2 = pExpTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_DECREMENT:{
+            node_t *node1 = pPostIncrement();
+            node_t *node2 = pExpTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_SEMIC:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
         default:
+            parse_error();
+            break;
 
     }
 
     return returnNode;
 
 }
-node_t * pPostIncrement(node_t * node, int terminal){
+node_t * pPostIncrement(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_POSTINCREMENT + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_INCREMENT:
-        case t_DECREMENT:
+        case t_INCREMENT:{
+            node_t *node1 = pIncrement();
+            addNode(node1, returnNode);
+            break;
+        }
+        case t_DECREMENT:{
+            node_t *node1 = pIncrement();
+            addNode(node1, returnNode);
+            break;
+        }
         default:
+            parse_error();
+            break;
 
     }
 
     return returnNode;
 
 }
-node_t * pTerm(node_t * node, int terminal){
+node_t * pTerm(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_TERM + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_PLUS:
-        case t_MINUS:
-        case t_PLUS_UNARY:
-        case t_MINUS_UNARY:
-        case t_INCREMENT:
-        case t_DECREMENT:
-        case t_LPAREN:
-        case t_LITERAL:
+        case t_PLUS:{
+            node_t *node1 = pFactor();
+            node_t *node2 = pTermTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_MINUS:{
+            node_t *node1 = pFactor();
+            node_t *node2 = pTermTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_PLUS_UNARY:{
+            node_t *node1 = pFactor();
+            node_t *node2 = pTermTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_MINUS_UNARY:{
+            node_t *node1 = pFactor();
+            node_t *node2 = pTermTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_INCREMENT:{
+            node_t *node1 = pFactor();
+            node_t *node2 = pTermTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_DECREMENT:{
+            node_t *node1 = pFactor();
+            node_t *node2 = pTermTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_LPAREN:{
+            node_t *node1 = pFactor();
+            node_t *node2 = pTermTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_LITERAL:{
+            node_t *node1 = pFactor();
+            node_t *node2 = pTermTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
         default:
+            parse_error();
+            break;
 
     }
 
     return returnNode;
 
 }
-node_t * pTermTail(node_t * node, int terminal){
+node_t * pTermTail(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_TERMTAIL + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_STAR:
-        case t_PCT:
-        case t_SLASH:
-        case t_SEMIC:
+        case t_STAR:{
+            advanceInput();
+            addNodeLabel(t_STAR, returnNode);
+            node_t *node2 = pFactor();
+            node_t *node3 = pTermTail();
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_PCT:{
+            advanceInput();
+            addNodeLabel(t_PCT, returnNode);
+            node_t *node2 = pFactor();
+            node_t *node3 = pTermTail();
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_SLASH:{
+            advanceInput();
+            addNodeLabel(t_SLASH, returnNode);
+            node_t *node2 = pFactor();
+            node_t *node3 = pTermTail();
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_SEMIC:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
         default:
+            parse_error();
+            break;
 
     }
 
     return returnNode;
 
 }
-node_t * pFactor(node_t * node, int terminal){
+node_t * pFactor(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_FACTOR + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_PLUS:
-        case t_MINUS:
-        case t_PLUS_UNARY:
-        case t_MINUS_UNARY:
-        case t_INCREMENT:
-        case t_DECREMENT:
-        case t_LPAREN:
-        case t_LITERAL:
+        case t_PLUS:{
+            node_t *node1 = pFactorHead();
+            node_t *node2 = pFactorTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_MINUS:{
+            node_t *node1 = pFactorHead();
+            node_t *node2 = pFactorTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_PLUS_UNARY:{
+            node_t *node1 = pFactorHead();
+            node_t *node2 = pFactorTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_MINUS_UNARY:{
+            node_t *node1 = pFactorHead();
+            node_t *node2 = pFactorTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_INCREMENT:{
+            node_t *node1 = pFactorHead();
+            node_t *node2 = pFactorTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_DECREMENT:{
+            node_t *node1 = pFactorHead();
+            node_t *node2 = pFactorTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_LPAREN:{
+            node_t *node1 = pFactorHead();
+            node_t *node2 = pFactorTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_LITERAL:{
+            node_t *node1 = pFactorHead();
+            node_t *node2 = pFactorTail();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            break;
+        }
         default:
+            parse_error();
+            break;
 
     }
 
     return returnNode;
 
 }
-node_t * pFactorHead(node_t * node, int terminal){
+node_t * pFactorHead(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_FACTORHEAD + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_PLUS:
-        case t_MINUS:
-        case t_PLUS_UNARY:
-        case t_MINUS_UNARY:
-        case t_INCREMENT:
-        case t_DECREMENT:
-        case t_LPAREN:
-        case t_LITERAL:
+        case t_PLUS:{
+            node_t *node1 = pSign();
+            node_t *node2 = pIncrement();
+            node_t *node3 = pFactorHead();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_MINUS:{
+            node_t *node1 = pSign();
+            node_t *node2 = pIncrement();
+            node_t *node3 = pFactorHead();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_PLUS_UNARY:{
+            node_t *node1 = pSign();
+            node_t *node2 = pIncrement();
+            node_t *node3 = pFactorHead();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_MINUS_UNARY:{
+            node_t *node1 = pSign();
+            node_t *node2 = pIncrement();
+            node_t *node3 = pFactorHead();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_INCREMENT:{
+            node_t *node1 = pIncrement();
+            node_t *node2 = pSign();
+            node_t *node3 = pFactorHead();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_DECREMENT:{
+            node_t *node1 = pIncrement();
+            node_t *node2 = pSign();
+            node_t *node3 = pFactorHead();
+            addNode(node1, returnNode);
+            addNode(node2, returnNode);
+            addNode(node3, returnNode);
+            break;
+        }
+        case t_LPAREN:{
+            advanceInput();
+            addNodeLabel(t_LPAREN, returnNode);
+            node_t *node2 = pExpression();
+            if(tok.terminal == t_RPAREN){
+                printf("ERIN ERROR");
+                addNode(node2, returnNode);
+                addNodeLabel(t_RPAREN, returnNode);
+            }
+            else
+                parse_error();
+            break;
+        }
+        case t_LITERAL:{
+            addNodeLabel(t_LITERAL, returnNode);
+            returnNode->leftChild->data = advanceInput();
+            break;
+        }
         default:
+            parse_error();
+            break;
 
     }
 
     return returnNode;
 
 }
-node_t * pSign(node_t * node, int terminal){
+node_t * pSign(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_SIGN + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_PLUS:
-        case t_MINUS:
-        case t_PLUS_UNARY:
-        case t_MINUS_UNARY:
-        case t_INCREMENT:
-        case t_DECREMENT:
-        case t_LPAREN:
-        case t_LITERAL:
+        case t_PLUS:{
+            advanceInput();
+            addNodeLabel(t_PLUS, returnNode);
+            break;
+        }
+        case t_MINUS:{
+            advanceInput();
+            addNodeLabel(t_MINUS, returnNode);
+            break;
+        }
+        case t_PLUS_UNARY:{
+            advanceInput();
+            addNodeLabel(t_PLUS_UNARY, returnNode);
+            break;
+        }
+        case t_MINUS_UNARY:{
+            advanceInput();
+            addNodeLabel(t_MINUS_UNARY, returnNode);
+            break;
+        }
+        case t_INCREMENT:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_DECREMENT:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_LPAREN:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_LITERAL:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
         default:
+            parse_error();
+            break;
 
     }
 
     return returnNode;
 
 }
-node_t * pIncrement(node_t * node, int terminal){
+node_t * pIncrement(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_INCREMENT + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_PLUS:
-        case t_MINUS:
-        case t_PLUS_UNARY:
-        case t_MINUS_UNARY:
-        case t_INCREMENT:
-        case t_DECREMENT:
-        case t_LPAREN:
-        case t_LITERAL:
-        case t_SEMIC:
+        case t_PLUS:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_MINUS:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_PLUS_UNARY:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_MINUS_UNARY:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_INCREMENT:{
+            advanceInput();
+            addNodeLabel(t_INCREMENT, returnNode);
+            break;
+        }
+        case t_DECREMENT:{
+            advanceInput();
+            addNodeLabel(t_DECREMENT, returnNode);
+            break;
+        }
+        case t_LPAREN:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_LITERAL:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_SEMIC:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
         default:
+            parse_error();
+            break;
 
     }
 
     return returnNode;
 
 }
-node_t * pFactorTail(node_t * node, int terminal){
+node_t * pFactorTail(){
 
     node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->label = s_FACTORTAIL + t_SEMIC + 1;
 
-    switch(terminal){
+    switch(tok.terminal){
 
-        case t_PLUS:
-        case t_MINUS:
-        case t_PLUS_UNARY:
-        case t_MINUS_UNARY:
-        case t_INCREMENT:
-        case t_DECREMENT:
-        case t_STAR:
-        case t_PCT:
-        case t_SLASH:
-        case t_BANG:
-        case t_CARET:
-        case t_LITERAL:
+        case t_PLUS:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_MINUS:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_PLUS_UNARY:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_MINUS_UNARY:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_INCREMENT:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_DECREMENT:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_STAR:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_PCT:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_SLASH:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_BANG:{
+            advanceInput();
+            addNodeLabel(t_BANG, returnNode);
+            break;
+        }
+        case t_CARET:{
+            advanceInput();
+            addNodeLabel(t_CARET, returnNode);
+            node_t * node2 = pFactor();
+            addNode(node2, returnNode);
+            break;
+        }
+        case t_SEMIC:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
         default:
+            parse_error();
+            break;
 
     }
 
     return returnNode;
 
-}*/
+}
 
 /********
     Scan source, identify structure, and print appropriately.
