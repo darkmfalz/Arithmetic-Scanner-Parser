@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include "reader.h"
 #include "char_classes.h"
+#include "parser.h"
 #include "scanner.h"
 
 static void print_location (token_t *tok)
@@ -130,9 +131,11 @@ void scan(location_t * loc, token_t * tok)
                         state = got_lparen;
                         break;
                     case RPAREN:
+                        tok->terminal = t_RPAREN;
                         ACCEPT(T_RPAREN);
                         break;
                     case SEMIC:
+                        tok->terminal = t_SEMIC;
                         ACCEPT(T_SEMIC);
                         break;
                     case END:
@@ -196,18 +199,23 @@ void scan(location_t * loc, token_t * tok)
             //What about positive and negative? We want the scanner
             //to parse the positive and negative signs for me
             case got_plus:
+                tok->terminal = t_PLUS;
                 ACCEPT_REUSE(T_OPERATOR);       //  +
                 break;
             case got_minus:
+                tok->terminal = t_MINUS;
                 ACCEPT_REUSE(T_OPERATOR);       //  -
                 break;
             case got_star:
+                tok->terminal = t_STAR;
                 ACCEPT_REUSE(T_OPERATOR);       //  * 
                 break;
             case got_slash:
+                tok->terminal = t_SLASH;
                 ACCEPT_REUSE(T_OPERATOR);       //  /
                 break;
             case got_pct:
+                tok->terminal = t_PCT;
                 ACCEPT_REUSE(T_OPERATOR);       //  %
                 break;
             case got_lparen:
@@ -219,6 +227,7 @@ void scan(location_t * loc, token_t * tok)
                         state = got_decr;
                         break;
                     default:
+                        tok->terminal = t_LPAREN;
                         ACCEPT_REUSE(T_LPAREN);
                         break;
                 }
@@ -229,9 +238,11 @@ void scan(location_t * loc, token_t * tok)
                         state = got_incr2;
                         break;
                     case RPAREN:
+                        tok->terminal = t_PLUS_UNARY;
                         ACCEPT(T_UNARY);
                         break;
                     default:
+                        tok->terminal = t_LPAREN;
                         ACCEPT_SHIFT(T_LPAREN, 2);
                         break;
                 }
@@ -242,9 +253,11 @@ void scan(location_t * loc, token_t * tok)
                         state = got_decr2;
                         break;
                     case RPAREN:
+                        tok->terminal = t_MINUS_UNARY;
                         ACCEPT(T_UNARY);
                         break;
                     default:
+                        tok->terminal = t_LPAREN;
                         ACCEPT_SHIFT(T_LPAREN, 2);
                         break;
                 }
@@ -252,9 +265,11 @@ void scan(location_t * loc, token_t * tok)
             case got_incr2:
                 switch(char_classes[c]){
                     case RPAREN:
+                        tok->terminal = t_INCREMENT;
                         ACCEPT(T_INCREMENT);
                         break;
                     default:
+                        tok->terminal = t_LPAREN;
                         ACCEPT_SHIFT(T_LPAREN, 3);
                         break;
                 }
@@ -262,9 +277,11 @@ void scan(location_t * loc, token_t * tok)
             case got_decr2:
                 switch(char_classes[c]){
                     case RPAREN:
+                        tok->terminal = t_DECREMENT;
                         ACCEPT(T_INCREMENT);
                         break;
                     default:
+                        tok->terminal = t_LPAREN;
                         ACCEPT_SHIFT(T_LPAREN, 3);
                         break;
                 }
@@ -285,6 +302,7 @@ void scan(location_t * loc, token_t * tok)
                         state = starting_exp;
                         break;*/
                     default:
+                        tok->terminal = t_LITERAL;
                         ACCEPT_REUSE(T_LITERAL);  /* decimal integer */
                         break;
                 }
@@ -294,6 +312,7 @@ void scan(location_t * loc, token_t * tok)
                     case DIG:
                         break;  /* stay put */
                     default:
+                        tok->terminal = t_LITERAL;
                         ACCEPT_REUSE(T_LITERAL);  /* fp */
                         break;
                 }
