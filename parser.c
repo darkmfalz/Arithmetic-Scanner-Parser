@@ -208,6 +208,7 @@ node_t * pExpression(){
             break;
         }
         default:
+            printf("erin");
             parse_error();
             break;
 
@@ -257,10 +258,12 @@ node_t * pExpTail(){
             break;
         }
         case t_SEMIC:{
+            advanceInput();
             addNodeLabel(t_EPSILON, returnNode);
             break;
         }
         default:
+            printf("nina");
             parse_error();
             break;
 
@@ -288,6 +291,7 @@ node_t * pPostIncrement(){
             break;
         }
         default:
+            printf("jane");
             parse_error();
             break;
 
@@ -361,6 +365,7 @@ node_t * pTerm(){
             break;
         }
         default:
+            printf("alisa");
             parse_error();
             break;
 
@@ -377,6 +382,14 @@ node_t * pTermTail(){
 
     switch(tok.terminal){
 
+        case t_PLUS:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_MINUS:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
         case t_STAR:{
             advanceInput();
             addNodeLabel(t_STAR, returnNode);
@@ -409,6 +422,7 @@ node_t * pTermTail(){
             break;
         }
         default:
+            printf("colleen");
             parse_error();
             break;
 
@@ -482,6 +496,7 @@ node_t * pFactor(){
             break;
         }
         default:
+            printf("sam");
             parse_error();
             break;
 
@@ -679,6 +694,7 @@ node_t * pIncrement(){
             break;
         }
         default:
+            printf("ava");
             parse_error();
             break;
 
@@ -748,6 +764,7 @@ node_t * pFactorTail(){
             break;
         }
         default:
+            printf("rachel");
             parse_error();
             break;
 
@@ -792,7 +809,10 @@ void parse(){
     while(tok.tc != T_EOF){
         
         //recurse for statement HERE;
-        advanceInput();
+        if(tok.tc != T_EOF && tok.tc != T_SPACE && tok.tc != T_NL_SPACE && tok.tc != T_SEMIC)
+            root = pExpression();
+        else
+            advanceInput();
         
     }
 
