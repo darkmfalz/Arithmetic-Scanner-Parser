@@ -59,7 +59,9 @@ void scan(location_t * loc, token_t * tok)
             got_incr,
             got_decr,
             got_incr2,
-            got_decr2
+            got_decr2,
+            got_caret,
+            got_bang
     } state = start;
 
 /* Standard way to recognize a token: put back lookahead character that
@@ -126,6 +128,12 @@ void scan(location_t * loc, token_t * tok)
                         break;
                     case SLASH:
                         state = got_slash;
+                        break;
+                    case CARET:
+                        state = got_caret;
+                        break;
+                    case BANG:
+                        state = got_bang;
                         break;
                     case LPAREN:
                         state = got_lparen;
@@ -217,6 +225,14 @@ void scan(location_t * loc, token_t * tok)
             case got_pct:
                 tok->terminal = t_PCT;
                 ACCEPT_REUSE(T_OPERATOR);       //  %
+                break;
+            case got_caret:
+                tok->terminal = t_CARET;
+                ACCEPT_REUSE(T_OPERATOR);
+                break;
+            case got_bang:
+                tok->terminal = t_BANG;
+                ACCEPT_REUSE(T_OPERATOR);
                 break;
             case got_lparen:
                 switch(char_classes[c]){

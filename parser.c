@@ -22,6 +22,7 @@
 
 static token_t     tok;
 static location_t  loc;
+static int isInt;
 
 /********
     A parse error has occurred.  Print error message and halt.
@@ -36,10 +37,8 @@ static void parse_error()
 }
 
 static void evaluate_error(node_t* node){
-    fprintf(stderr, "Syntax error");
-    fprintf(stderr, " at line %d, column %d\n",
-        tok.location.line->line_num, tok.location.column);
-    fprintf(stderr, "Problem Node: ");
+    fprintf(stderr, "Evaluation error\n");
+    fprintf(stderr, "Problem Node: \n");
     char * indent = " ";
     printNodeError(node, indent, 1, 1);
     exit(1);
@@ -147,7 +146,7 @@ char * advanceInput(){
         }
         else{
 
-            printf(";\n==");
+            printf(";");
 
             scan(&loc, &tok);
             return ";";
@@ -643,6 +642,10 @@ float evaluate(node_t *node, float start){
             break;
         case t_LITERAL:
             returnValue = atof(node->data);
+            if(returnValue == (float)((int) returnValue))
+                isInt = 1;
+            else
+                isInt = 0;
             break;
         case t_EPSILON:
             returnValue = (float)t_EPSILON;
@@ -668,7 +671,7 @@ float evaluate(node_t *node, float start){
                 //If it's not a postincrement expression -- i.e.:
                 // + <T> <ET> OR - <T> <ET>
                 if(node->leftChild->rightSibling != NULL && node->leftChild->rightSibling->rightSibling != NULL){
-
+                        
                     float f2 = evaluate(node->leftChild->rightSibling, start);
                     float f3;
 
@@ -678,7 +681,7 @@ float evaluate(node_t *node, float start){
                         returnValue = -1.0*f2 + f3;
 
                     }
-                    else if(f2 == (float)t_PLUS){
+                    else if(f1 == (float)t_PLUS){
 
                         f3 = evaluate(node->leftChild->rightSibling->rightSibling, f1 + f2);
                         returnValue = f2 + f3;
@@ -697,10 +700,8 @@ float evaluate(node_t *node, float start){
 
                         if(node->parent->rightSibling != NULL && node->parent->rightSibling->label == t_RPAREN){
 
-                            if(f1 == (float)t_INCREMENT)
-                                returnValue = f2 + 1;
-                            else if(f2 == (float)t_DECREMENT)
-                                returnValue = f2 - 1;
+                            if(f1 == 1.0 || f1 == -1.0 || f1 == 0.0)
+                                returnValue = f1 + f2;
                             else
                                 evaluate_error(node);
 
@@ -760,13 +761,13 @@ float evaluate(node_t *node, float start){
                         returnValue = f2 * f3;
 
                     }
-                    else if(f2 == (float)t_SLASH){
+                    else if(f1 == (float)t_SLASH){
 
                         f3 = evaluate(node->leftChild->rightSibling->rightSibling, start/f2);
                         returnValue = 1/f2 * f3;
 
                     }
-                    else if(f2 == (float)t_PCT){
+                    else if(f1 == (float)t_PCT){
 
                         f3 = evaluate(node->leftChild->rightSibling->rightSibling, (float)(adeebRound(start) % adeebRound(f2)));
                         if(start != 0.0)
@@ -932,6 +933,7 @@ void parse(){
     //of the first line
 
     set_to_beginning(&loc);
+    isInt = 0;
 
     scan(&loc, &tok);
     while(tok.tc != T_EOF){
@@ -941,9 +943,18 @@ void parse(){
             
             node_t * root = pExpression();
             printf("\n");
-            char * indent = " ";
-            printNode(root, indent, 1, 1);
-            //deleteNode(root);
+            float eval = evaluate(root, 1);
+            if(isInt){
+
+                if(eval != (float)((int) eval))
+                    printf("==%d (or %f)", (int) eval, eval);
+                else
+                    printf("==%d", (int) eval);
+
+            }
+            else
+                printf("==%f", eval);
+            isInt = 0;
 
         }
         else
@@ -951,8 +962,6 @@ void parse(){
             findNextInput();
         
     }
-
-    printf("%f %f %f", factorial(3.0), factorial(3.5), factorial(4.0));
 
 }
 
@@ -989,7 +998,7 @@ float factorial(float target){
         }
 
     }
-    else if(target > -1.0){
+    else if(target > - 1.0){
         //implementation of the Stirling's Approximation
         //to give a "general" factorial.
         //in fact, this "factorial" function is just a domain-changed
