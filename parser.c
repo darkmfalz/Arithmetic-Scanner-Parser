@@ -878,7 +878,7 @@ void printNode(node_t *node, char * indent, int length, int last){
 
     if(last){
 
-        printf("+-");
+        printf("\\-");
         
         for(i = 0; i < length; i++){
             if(indent[i] == '\0')
@@ -903,7 +903,7 @@ void printNode(node_t *node, char * indent, int length, int last){
             else
                 newIndent[i] = indent[i];
         }
-        newIndent[length] = ' ';
+        newIndent[length] = '|';
         newIndent[length+1] = ' ';
         newIndent[length+2] = '\0';
 
