@@ -55,6 +55,7 @@ typedef struct node {
 void addNodeLabel(int label, node_t * parent);
 void addNode(node_t * child, node_t * parent);
 char * advanceInput();
+void findNextInput();
 //productions
 node_t * pExpression();
 node_t * pExpTail();
@@ -69,6 +70,10 @@ node_t * pFactorTail();
 
 void parse();
     /* Scan source, identify structure, and print appropriately. */
+
+//print functions
+void printNode(node_t *node, char * indent, int length, int last);
+void printLabel(node_t * node);
 
 //delete functions
 void deleteNode(node_t *node);

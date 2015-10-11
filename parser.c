@@ -28,7 +28,7 @@ static location_t  loc;
  ********/
 static void parse_error()
 {
-    fprintf(stderr, "%c\n", get_character(&(tok.location)));
+    fprintf(stderr, "Problem Character: %c\n", get_character(&(tok.location)));
     fprintf(stderr, "Syntax error");
     fprintf(stderr, " at line %d, column %d\n",
         tok.location.line->line_num, tok.location.column);
@@ -106,6 +106,7 @@ char * advanceInput(){
                 printf("%s", current);
 
                 scan(&loc, &tok);
+                findNextInput();
                 return current;
 
             }
@@ -140,6 +141,22 @@ char * advanceInput(){
             return ";";
 
         }
+
+}
+
+void findNextInput(){
+
+    if(tok.tc == T_SPACE || tok.tc == T_NL_SPACE){
+
+        int i;
+
+        for(i = 0; i < tok.length; i++)
+            printf("%c", get_character(&(tok.location)));
+
+        scan(&loc, &tok);
+        findNextInput();
+                
+    }
 
 }
 
@@ -255,6 +272,10 @@ node_t * pExpTail(){
             node_t *node2 = pExpTail();
             addNode(node1, returnNode);
             addNode(node2, returnNode);
+            break;
+        }
+        case t_RPAREN:{
+            addNodeLabel(t_EPSILON, returnNode);
             break;
         }
         case t_SEMIC:{
@@ -390,6 +411,14 @@ node_t * pTermTail(){
             addNodeLabel(t_EPSILON, returnNode);
             break;
         }
+        case t_INCREMENT:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_DECREMENT:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
         case t_STAR:{
             advanceInput();
             addNodeLabel(t_STAR, returnNode);
@@ -415,6 +444,10 @@ node_t * pTermTail(){
             node_t *node3 = pTermTail();
             addNode(node2, returnNode);
             addNode(node3, returnNode);
+            break;
+        }
+        case t_RPAREN:{
+            addNodeLabel(t_EPSILON, returnNode);
             break;
         }
         case t_SEMIC:{
@@ -572,7 +605,7 @@ node_t * pFactorHead(){
             addNodeLabel(t_LPAREN, returnNode);
             node_t *node2 = pExpression();
             if(tok.terminal == t_RPAREN){
-                printf("ERIN ERROR");
+                advanceInput();
                 addNode(node2, returnNode);
                 addNodeLabel(t_RPAREN, returnNode);
             }
@@ -685,6 +718,10 @@ node_t * pIncrement(){
             addNodeLabel(t_EPSILON, returnNode);
             break;
         }
+        case t_RPAREN:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
         case t_LITERAL:{
             addNodeLabel(t_EPSILON, returnNode);
             break;
@@ -744,6 +781,10 @@ node_t * pFactorTail(){
             break;
         }
         case t_SLASH:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        case t_RPAREN:{
             addNodeLabel(t_EPSILON, returnNode);
             break;
         }
@@ -809,11 +850,171 @@ void parse(){
     while(tok.tc != T_EOF){
         
         //recurse for statement HERE;
-        if(tok.tc != T_EOF && tok.tc != T_SPACE && tok.tc != T_NL_SPACE && tok.tc != T_SEMIC)
+        if(tok.tc != T_EOF && tok.tc != T_SPACE && tok.tc != T_NL_SPACE){
+            
             root = pExpression();
+            printf("\n");
+            char * indent = " ";
+            printNode(root, indent, 1, 1);
+
+        }
         else
-            advanceInput();
+            //advanceInput();
+            findNextInput();
         
+    }
+
+}
+
+void printNode(node_t *node, char * indent, int length, int last){
+    //Based on C# Example Code
+    //from this stackoverflow thread:
+    //http://stackoverflow.com/questions/1649027/how-do-i-print-out-a-tree-structure
+
+    int i;
+    char * newIndent = malloc(sizeof(char)*(length + 3));
+
+    printf("%s", indent);
+
+    if(last){
+
+        printf("+-");
+        
+        for(i = 0; i < length; i++){
+            if(indent[i] == '\0')
+                break;
+            else
+                newIndent[i] = indent[i];
+        }
+        newIndent[length] = ' ';
+        newIndent[length+1] = ' ';
+        newIndent[length+2] = '\0';
+
+        length = length + 2;
+
+    }
+    else{
+
+        printf("|-");
+
+        for(i = 0; i < length; i++){
+            if(indent[i] == '\0')
+                break;
+            else
+                newIndent[i] = indent[i];
+        }
+        newIndent[length] = ' ';
+        newIndent[length+1] = ' ';
+        newIndent[length+2] = '\0';
+
+        length = length + 2;
+
+    }
+    printLabel(node);
+
+    node_t * currNode = node->leftChild;
+    while(currNode != NULL){
+
+        if(currNode->rightSibling == NULL){
+
+            printNode(currNode, newIndent, length, 1);
+            break;
+
+        }
+        else{
+
+            printNode(currNode, newIndent, length, 0);
+            currNode = currNode->rightSibling;
+
+        }
+
+    }
+
+
+}
+
+void printLabel(node_t * node){
+
+    switch(node->label){
+
+        case t_PLUS:
+            printf("{+}\n");
+            break;
+        case t_MINUS:
+            printf("{-}\n");
+            break;
+        case t_PLUS_UNARY:
+            printf("{(+)}\n");
+            break;
+        case t_MINUS_UNARY:
+            printf("{(-)}\n");
+            break;
+        case t_INCREMENT:
+            printf("{(++)}\n");
+            break;
+        case t_STAR:
+            printf("{*}\n");
+            break;
+        case t_PCT:
+            printf("{%%}\n");
+            break;
+        case t_SLASH:
+            printf("{/}\n");
+            break;
+        case t_LPAREN:
+            printf("{(}\n");
+            break;
+        case t_RPAREN:
+            printf("{)}\n");
+            break;
+        case t_BANG:
+            printf("{!}\n");
+            break;
+        case t_CARET:
+            printf("{^}\n");
+            break;
+        case t_LITERAL:
+            printf("{%s}\n", node->data);
+            break;
+        case t_EPSILON:
+            printf("{e}\n");
+            break;
+        case t_SEMIC:
+            printf("{;}\n");
+            break;
+        case (s_EXPRESSION + t_SEMIC + 1):
+            printf("{<E>}\n");
+            break;
+        case (s_EXPTAIL + t_SEMIC + 1):
+            printf("{<ET>}\n");
+            break;
+        case (s_POSTINCREMENT + t_SEMIC + 1):
+            printf("{<PI>}\n");
+            break;
+        case (s_TERM + t_SEMIC + 1):
+            printf("{<T>}\n");
+            break;
+        case (s_TERMTAIL + t_SEMIC + 1):
+            printf("{<TT>}\n");
+            break;
+        case (s_FACTOR + t_SEMIC + 1):
+            printf("{<F>}\n");
+            break;
+        case (s_FACTORHEAD + t_SEMIC + 1):
+            printf("{<FH>}\n");
+            break;
+        case (s_SIGN + t_SEMIC + 1):
+            printf("{<S>}\n");
+            break;
+        case (s_INCREMENT + t_SEMIC + 1):
+            printf("{<I>}\n");
+            break;
+        case (s_FACTORTAIL + t_SEMIC + 1):
+            printf("{<FT>}\n");
+            break;
+        default:
+            break;
+
     }
 
 }
