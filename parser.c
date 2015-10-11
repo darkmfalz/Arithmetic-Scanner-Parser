@@ -872,13 +872,13 @@ void printNode(node_t *node, char * indent, int length, int last){
     //http://stackoverflow.com/questions/1649027/how-do-i-print-out-a-tree-structure
 
     int i;
-    char * newIndent = malloc(sizeof(char)*(length + 3));
+    char * newIndent = malloc(sizeof(char)*(length + 4));
 
     printf("%s", indent);
 
     if(last){
 
-        printf("\\-");
+        printf("\\--");
         
         for(i = 0; i < length; i++){
             if(indent[i] == '\0')
@@ -888,14 +888,15 @@ void printNode(node_t *node, char * indent, int length, int last){
         }
         newIndent[length] = ' ';
         newIndent[length+1] = ' ';
-        newIndent[length+2] = '\0';
+        newIndent[length+2] = ' ';
+        newIndent[length+3] = '\0';
 
-        length = length + 2;
+        length = length + 3;
 
     }
     else{
 
-        printf("|-");
+        printf("|--");
 
         for(i = 0; i < length; i++){
             if(indent[i] == '\0')
@@ -905,9 +906,10 @@ void printNode(node_t *node, char * indent, int length, int last){
         }
         newIndent[length] = '|';
         newIndent[length+1] = ' ';
-        newIndent[length+2] = '\0';
+        newIndent[length+2] = ' ';
+        newIndent[length+3] = '\0';
 
-        length = length + 2;
+        length = length + 3;
 
     }
     printLabel(node);
@@ -951,6 +953,9 @@ void printLabel(node_t * node){
             break;
         case t_INCREMENT:
             printf("{(++)}\n");
+            break;
+        case t_DECREMENT:
+            printf("{(--)}\n");
             break;
         case t_STAR:
             printf("{*}\n");
