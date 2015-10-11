@@ -74,6 +74,10 @@ void parse();
     /* Scan source, identify structure, and print appropriately. */
 
 int adeebRound(float target);
+float factorial(float target);
+float exponent(float base, float index);
+float _exponent(float base, float index, float precision);
+float adeebSqrt(float target);
 
 //print functions
 void printNode(node_t *node, char * indent, int length, int last);

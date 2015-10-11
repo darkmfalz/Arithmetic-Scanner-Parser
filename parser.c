@@ -849,7 +849,7 @@ float evaluate(node_t *node, float start){
 
             }
             else
-                evaluate_error(node)
+                evaluate_error(node);
             break;
         }
         case (s_SIGN + t_SEMIC + 1):{
@@ -868,7 +868,7 @@ float evaluate(node_t *node, float start){
 
             break;
         }
-        case (s_INCREMENT + t_SEMIC + 1){
+        case (s_INCREMENT + t_SEMIC + 1):{
             if(node->leftChild != NULL){
 
                 if(node->leftChild->label == t_INCREMENT)
@@ -952,6 +952,8 @@ void parse(){
         
     }
 
+    printf("%f %f %f", factorial(3.0), factorial(3.5), factorial(4.0));
+
 }
 
 int adeebRound(float target){
@@ -964,6 +966,107 @@ int adeebRound(float target){
         returnValue++;
 
     return returnValue;
+
+}
+
+float factorial(float target){
+
+    float result = 0.0;
+
+    if(target == (float)((int) target) && target >= 0.0){
+
+        if(target == 0.0 || target == 1.0)
+            result = 1.0;
+        else{
+
+            result = target;
+
+            float i;
+
+            for(i = 1.0; i < target; i++)
+                result = result * i;
+
+        }
+
+    }
+    else if(target > -1.0){
+        //implementation of the Stirling's Approximation
+        //to give a "general" factorial.
+        //in fact, this "factorial" function is just a domain-changed
+        //Euler-Gamma function!
+        //The formula was drawn from Wikipedia: https://en.wikipedia.org/wiki/Stirling%27s_approximation#Versions_suitable_for_calculators
+        //This simplification was created by Gergo Nemes.
+
+        float z = target + 1.0;
+        float pi = 3.1415926535897932385;
+        float e = 2.7182818284590452354;
+
+        result = adeebSqrt(2*pi/z)*exponent(1/e*(z + 1/(12*z - 1/(10*z))), z);
+
+    }
+    return result;
+
+}
+
+float exponent(float base, float index){
+    //Implemented based on code in this stack overflow thread:
+    //http://stackoverflow.com/questions/3518973/floating-point-exponentiation-without-power-function
+    return _exponent(base, index, 0.000001); 
+
+}
+
+float _exponent(float base, float index, float precision){
+    //Implemented based on code in this stack overflow thread:
+    //http://stackoverflow.com/questions/3518973/floating-point-exponentiation-without-power-function
+    if(index < 0.0)
+        return 1.0/_exponent(base, -1.0*index, precision);
+    if(index == 0.0)
+        return 1.0;
+    else if(index >= 10)
+        return _exponent(base, index/2.0, precision/2.0) * _exponent(base, index/2.0, precision/2.0);
+    else if(index >= 1.0){
+
+        float result = 1.0;
+
+        while(index >= 1.0){
+
+            result = result * base;
+            index--;
+
+        }
+
+        return result * _exponent(base, index, precision);
+
+    }
+    else if(precision >= 1.0)
+        return adeebSqrt(base);
+
+    return adeebSqrt(_exponent(base, index*2.0, precision*2.0));
+
+}
+
+float adeebSqrt(float target){
+    //Implement Newton's Method of root finding
+    //for a function f(x) = x^2 - a, where a is the target
+    //the found root will be the root of the target
+
+    float precision = 0.000001;
+    float current;
+
+    if(target > 1.0)
+        current = (target - 1.0)*0.5 + 1.0;
+    else
+        current = target;
+
+    float bit = (current*current - target)/(2*current);
+    while(bit > precision){
+
+        current = current - bit;
+        bit = (current*current - target)/(2*current);
+
+    }
+
+    return current;
 
 }
 
