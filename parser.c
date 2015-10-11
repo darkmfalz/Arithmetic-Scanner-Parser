@@ -27,11 +27,21 @@ static location_t  loc;
     A parse error has occurred.  Print error message and halt.
  ********/
 static void parse_error()
-{
-    fprintf(stderr, "Problem Character: %c\n", get_character(&(tok.location)));
+{    
     fprintf(stderr, "Syntax error");
     fprintf(stderr, " at line %d, column %d\n",
         tok.location.line->line_num, tok.location.column);
+    fprintf(stderr, "Problem Character: %c\n", get_character(&(tok.location)));
+    exit(1);
+}
+
+static void evaluate_error(node_t* node){
+    fprintf(stderr, "Syntax error");
+    fprintf(stderr, " at line %d, column %d\n",
+        tok.location.line->line_num, tok.location.column);
+    fprintf(stderr, "Problem Node: ");
+    char * indent = " ";
+    printNodeError(node, indent, 1, 1);
     exit(1);
 }
 
@@ -68,6 +78,8 @@ void addNodeLabel(int label, node_t * parent){
 }
 
 void addNode(node_t* child, node_t * parent){
+
+    child->parent = parent;
 
     if(parent->leftChild == NULL)
         parent->leftChild = child;
@@ -168,55 +180,13 @@ node_t * pExpression(){
 
     switch(tok.terminal){
 
-        case t_PLUS:{
-            node_t *node1 = pTerm();
-            node_t *node2 = pExpTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_MINUS:{
-            node_t *node1 = pTerm();
-            node_t *node2 = pExpTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_PLUS_UNARY:{
-            node_t *node1 = pTerm();
-            node_t *node2 = pExpTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_MINUS_UNARY:{
-            node_t *node1 = pTerm();
-            node_t *node2 = pExpTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_INCREMENT:{
-            node_t *node1 = pTerm();
-            node_t *node2 = pExpTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_DECREMENT:{
-            node_t *node1 = pTerm();
-            node_t *node2 = pExpTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_LPAREN:{
-            node_t *node1 = pTerm();
-            node_t *node2 = pExpTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
+        case t_PLUS:
+        case t_MINUS:
+        case t_PLUS_UNARY:
+        case t_MINUS_UNARY:
+        case t_INCREMENT:
+        case t_DECREMENT:
+        case t_LPAREN:
         case t_LITERAL:{
             node_t *node1 = pTerm();
             node_t *node2 = pExpTail();
@@ -260,13 +230,7 @@ node_t * pExpTail(){
             addNode(node3, returnNode);
             break;
         }
-        case t_INCREMENT:{
-            node_t *node1 = pPostIncrement();
-            node_t *node2 = pExpTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
+        case t_INCREMENT:
         case t_DECREMENT:{
             node_t *node1 = pPostIncrement();
             node_t *node2 = pExpTail();
@@ -301,11 +265,7 @@ node_t * pPostIncrement(){
 
     switch(tok.terminal){
 
-        case t_INCREMENT:{
-            node_t *node1 = pIncrement();
-            addNode(node1, returnNode);
-            break;
-        }
+        case t_INCREMENT:
         case t_DECREMENT:{
             node_t *node1 = pIncrement();
             addNode(node1, returnNode);
@@ -329,55 +289,13 @@ node_t * pTerm(){
 
     switch(tok.terminal){
 
-        case t_PLUS:{
-            node_t *node1 = pFactor();
-            node_t *node2 = pTermTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_MINUS:{
-            node_t *node1 = pFactor();
-            node_t *node2 = pTermTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_PLUS_UNARY:{
-            node_t *node1 = pFactor();
-            node_t *node2 = pTermTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_MINUS_UNARY:{
-            node_t *node1 = pFactor();
-            node_t *node2 = pTermTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_INCREMENT:{
-            node_t *node1 = pFactor();
-            node_t *node2 = pTermTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_DECREMENT:{
-            node_t *node1 = pFactor();
-            node_t *node2 = pTermTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_LPAREN:{
-            node_t *node1 = pFactor();
-            node_t *node2 = pTermTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
+        case t_PLUS:
+        case t_MINUS:
+        case t_PLUS_UNARY:
+        case t_MINUS_UNARY:
+        case t_INCREMENT:
+        case t_DECREMENT:
+        case t_LPAREN:
         case t_LITERAL:{
             node_t *node1 = pFactor();
             node_t *node2 = pTermTail();
@@ -403,18 +321,9 @@ node_t * pTermTail(){
 
     switch(tok.terminal){
 
-        case t_PLUS:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_MINUS:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_INCREMENT:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
+        case t_PLUS:
+        case t_MINUS:
+        case t_INCREMENT:
         case t_DECREMENT:{
             addNodeLabel(t_EPSILON, returnNode);
             break;
@@ -472,55 +381,13 @@ node_t * pFactor(){
 
     switch(tok.terminal){
 
-        case t_PLUS:{
-            node_t *node1 = pFactorHead();
-            node_t *node2 = pFactorTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_MINUS:{
-            node_t *node1 = pFactorHead();
-            node_t *node2 = pFactorTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_PLUS_UNARY:{
-            node_t *node1 = pFactorHead();
-            node_t *node2 = pFactorTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_MINUS_UNARY:{
-            node_t *node1 = pFactorHead();
-            node_t *node2 = pFactorTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_INCREMENT:{
-            node_t *node1 = pFactorHead();
-            node_t *node2 = pFactorTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_DECREMENT:{
-            node_t *node1 = pFactorHead();
-            node_t *node2 = pFactorTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
-        case t_LPAREN:{
-            node_t *node1 = pFactorHead();
-            node_t *node2 = pFactorTail();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            break;
-        }
+        case t_PLUS:
+        case t_MINUS:
+        case t_PLUS_UNARY:
+        case t_MINUS_UNARY:
+        case t_INCREMENT:
+        case t_DECREMENT:
+        case t_LPAREN:
         case t_LITERAL:{
             node_t *node1 = pFactorHead();
             node_t *node2 = pFactorTail();
@@ -546,33 +413,9 @@ node_t * pFactorHead(){
 
     switch(tok.terminal){
 
-        case t_PLUS:{
-            node_t *node1 = pSign();
-            node_t *node2 = pIncrement();
-            node_t *node3 = pFactorHead();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            addNode(node3, returnNode);
-            break;
-        }
-        case t_MINUS:{
-            node_t *node1 = pSign();
-            node_t *node2 = pIncrement();
-            node_t *node3 = pFactorHead();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            addNode(node3, returnNode);
-            break;
-        }
-        case t_PLUS_UNARY:{
-            node_t *node1 = pSign();
-            node_t *node2 = pIncrement();
-            node_t *node3 = pFactorHead();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            addNode(node3, returnNode);
-            break;
-        }
+        case t_PLUS:
+        case t_MINUS:
+        case t_PLUS_UNARY:
         case t_MINUS_UNARY:{
             node_t *node1 = pSign();
             node_t *node2 = pIncrement();
@@ -582,15 +425,7 @@ node_t * pFactorHead(){
             addNode(node3, returnNode);
             break;
         }
-        case t_INCREMENT:{
-            node_t *node1 = pIncrement();
-            node_t *node2 = pSign();
-            node_t *node3 = pFactorHead();
-            addNode(node1, returnNode);
-            addNode(node2, returnNode);
-            addNode(node3, returnNode);
-            break;
-        }
+        case t_INCREMENT:
         case t_DECREMENT:{
             node_t *node1 = pIncrement();
             node_t *node2 = pSign();
@@ -655,18 +490,9 @@ node_t * pSign(){
             addNodeLabel(t_MINUS_UNARY, returnNode);
             break;
         }
-        case t_INCREMENT:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_DECREMENT:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_LPAREN:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
+        case t_INCREMENT:
+        case t_DECREMENT:
+        case t_LPAREN:
         case t_LITERAL:{
             addNodeLabel(t_EPSILON, returnNode);
             break;
@@ -688,18 +514,9 @@ node_t * pIncrement(){
 
     switch(tok.terminal){
 
-        case t_PLUS:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_MINUS:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_PLUS_UNARY:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
+        case t_PLUS:
+        case t_MINUS:
+        case t_PLUS_UNARY:
         case t_MINUS_UNARY:{
             addNodeLabel(t_EPSILON, returnNode);
             break;
@@ -714,18 +531,9 @@ node_t * pIncrement(){
             addNodeLabel(t_DECREMENT, returnNode);
             break;
         }
-        case t_LPAREN:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_RPAREN:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_LITERAL:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
+        case t_LPAREN:
+        case t_RPAREN:
+        case t_LITERAL:
         case t_SEMIC:{
             addNodeLabel(t_EPSILON, returnNode);
             break;
@@ -748,42 +556,15 @@ node_t * pFactorTail(){
 
     switch(tok.terminal){
 
-        case t_PLUS:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_MINUS:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_PLUS_UNARY:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_MINUS_UNARY:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_INCREMENT:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_DECREMENT:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_STAR:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_PCT:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
-        case t_SLASH:{
-            addNodeLabel(t_EPSILON, returnNode);
-            break;
-        }
+        case t_PLUS:
+        case t_MINUS:
+        case t_PLUS_UNARY:
+        case t_MINUS_UNARY:
+        case t_INCREMENT:
+        case t_DECREMENT:
+        case t_STAR:
+        case t_PCT:
+        case t_SLASH:
         case t_RPAREN:{
             addNodeLabel(t_EPSILON, returnNode);
             break;
@@ -815,6 +596,332 @@ node_t * pFactorTail(){
 
 }
 
+float evaluate(node_t *node, float start){
+
+    float returnValue;
+
+    switch(node->label){
+
+        case t_PLUS:
+            returnValue = (float)t_PLUS;
+            break;
+        case t_MINUS:
+            returnValue = (float)t_MINUS;
+            break;
+        case t_PLUS_UNARY:
+            returnValue = (float)t_PLUS_UNARY;
+            break;
+        case t_MINUS_UNARY:
+            returnValue = (float)t_MINUS_UNARY;
+            break;
+        case t_INCREMENT:
+            returnValue = (float)t_INCREMENT;
+            break;
+        case t_DECREMENT:
+            returnValue = (float)t_DECREMENT;
+            break;
+        case t_STAR:
+            returnValue = (float)t_STAR;
+            break;
+        case t_PCT:
+            returnValue = (float)t_PCT;
+            break;
+        case t_SLASH:
+            returnValue = (float)t_SLASH;
+            break;
+        case t_LPAREN:
+            returnValue = (float)t_LPAREN;
+            break;
+        case t_RPAREN:
+            returnValue = (float)t_RPAREN;
+            break;
+        case t_BANG:
+            returnValue = (float)t_BANG;
+            break;
+        case t_CARET:
+            returnValue = (float)t_CARET;
+            break;
+        case t_LITERAL:
+            returnValue = atof(node->data);
+            break;
+        case t_EPSILON:
+            returnValue = (float)t_EPSILON;
+            break;
+        case t_SEMIC:
+            returnValue = (float)t_SEMIC;
+            break;
+        case (s_EXPRESSION + t_SEMIC + 1):{
+            if(node->leftChild != NULL && node->leftChild->rightSibling != NULL){
+                float f1 = evaluate(node->leftChild, start);
+                float f2 = evaluate(node->leftChild->rightSibling, f1);
+                returnValue = f1 + f2;
+            }
+            else
+                evaluate_error(node);
+            break;
+        }
+        case (s_EXPTAIL + t_SEMIC + 1):{
+            if(node->leftChild != NULL){
+
+                float f1 = evaluate(node->leftChild, start);
+
+                //If it's not a postincrement expression -- i.e.:
+                // + <T> <ET> OR - <T> <ET>
+                if(node->leftChild->rightSibling != NULL && node->leftChild->rightSibling->rightSibling != NULL){
+
+                    float f2 = evaluate(node->leftChild->rightSibling, start);
+                    float f3;
+
+                    if(f1 == (float)t_MINUS){
+
+                        f3 = evaluate(node->leftChild->rightSibling->rightSibling, f1 - f2);
+                        returnValue = -1.0*f2 + f3;
+
+                    }
+                    else if(f2 == (float)t_PLUS){
+
+                        f3 = evaluate(node->leftChild->rightSibling->rightSibling, f1 + f2);
+                        returnValue = f2 + f3;
+
+                    }
+                    else
+                        evaluate_error(node);
+
+                }
+                //otherwise, it IS a postincrement expression...
+                else if(node->leftChild->rightSibling != NULL){
+
+                    float f2 = evaluate(node->leftChild->rightSibling, start);
+
+                    if(node->parent != NULL){
+
+                        if(node->parent->rightSibling != NULL && node->parent->rightSibling->label == t_RPAREN){
+
+                            if(f1 == (float)t_INCREMENT)
+                                returnValue = f2 + 1;
+                            else if(f2 == (float)t_DECREMENT)
+                                returnValue = f2 - 1;
+                            else
+                                evaluate_error(node);
+
+                        }
+                        else
+                            returnValue = f2;
+
+                    }
+                    else
+                        evaluate_error(node);
+
+                }
+                //or else it's an epsilon or error
+                else{
+                    if(f1 == (float)t_EPSILON)
+                        returnValue = 0;
+                    else
+                        evaluate_error(node);
+                }
+             
+            }
+            else
+                evaluate_error(node);
+            
+            break;
+        }
+        case (s_POSTINCREMENT + t_SEMIC + 1):{
+            if(node->leftChild != NULL)
+                returnValue = evaluate(node->leftChild, start);
+            else
+                evaluate_error(node);
+            break;
+        }
+        case (s_TERM + t_SEMIC + 1):{
+            if(node->leftChild != NULL && node->leftChild->rightSibling != NULL){
+                float f1 = evaluate(node->leftChild, start);
+                float f2 = evaluate(node->leftChild->rightSibling, f1);
+                returnValue = f1 * f2;
+            }
+            else
+                evaluate_error(node);
+            break;
+        }
+        case (s_TERMTAIL + t_SEMIC + 1):{
+            if(node->leftChild != NULL){
+
+                float f1 = evaluate(node->leftChild, start);
+
+                if(node->leftChild->rightSibling != NULL && node->leftChild->rightSibling->rightSibling != NULL){
+
+                    float f2 = evaluate(node->leftChild->rightSibling, start);
+                    float f3 = evaluate(node->leftChild->rightSibling->rightSibling, start*f2);
+
+                    if(f1 == (float)t_STAR){
+
+                        f3 = evaluate(node->leftChild->rightSibling->rightSibling, start*f2);
+                        returnValue = f2 * f3;
+
+                    }
+                    else if(f2 == (float)t_SLASH){
+
+                        f3 = evaluate(node->leftChild->rightSibling->rightSibling, start/f2);
+                        returnValue = 1/f2 * f3;
+
+                    }
+                    else if(f2 == (float)t_PCT){
+
+                        f3 = evaluate(node->leftChild->rightSibling->rightSibling, (float)(adeebRound(start) % adeebRound(f2)));
+                        if(start != 0.0)
+                            returnValue = ((float)(adeebRound(start) % adeebRound(f2)))/start * f3;
+                        else
+                            returnValue = 0.0;
+
+                    }
+                    else
+                        evaluate_error(node);
+
+                }
+                //or else it's an epsilon or error
+                else{
+                    if(f1 == (float)t_EPSILON)
+                        returnValue = 1;
+                    else
+                        evaluate_error(node);
+                }
+            }
+            else
+                evaluate_error(node);
+            break;
+        }
+        case (s_FACTOR + t_SEMIC + 1):{
+            if(node->leftChild != NULL && node->leftChild->rightSibling != NULL){
+                float f1 = evaluate(node->leftChild, start);
+                float f2 = evaluate(node->leftChild->rightSibling, f1);
+                returnValue = f1 + f2;
+            }
+            else
+                evaluate_error(node);
+            break;
+        }
+        case (s_FACTORHEAD + t_SEMIC + 1):{
+            if(node->leftChild != NULL){
+
+                if(node->leftChild->rightSibling != NULL && node->leftChild->rightSibling->rightSibling != NULL){
+
+                    if(node->leftChild->label == s_INCREMENT + t_SEMIC + 1){
+
+                        float f1 = evaluate(node->leftChild, start);
+                        float f2 = evaluate(node->leftChild->rightSibling, start);
+                        float f3 = evaluate(node->leftChild->rightSibling->rightSibling, start);
+
+                        returnValue = f1 + (f2 * f3);
+
+                    }
+                    else if(node->leftChild->label == s_SIGN + t_SEMIC + 1){
+
+                        float f1 = evaluate(node->leftChild, start);
+                        float f2 = evaluate(node->leftChild->rightSibling, start);
+                        float f3 = evaluate(node->leftChild->rightSibling->rightSibling, start);
+
+                        returnValue = f1*(f2 + f3);
+
+                    }
+                    else if(node->leftChild->label == t_LPAREN){
+
+                        if(node->leftChild->rightSibling->label == (s_EXPRESSION + t_SEMIC + 1))
+                            returnValue = evaluate(node->leftChild->rightSibling, start);
+                        else
+                            evaluate_error(node);
+
+                    }
+                    else
+                        evaluate_error(node);
+
+                }
+                else if(node->leftChild->rightSibling == NULL){
+
+                    if(node->leftChild->label == t_LITERAL)
+                        returnValue = evaluate(node->leftChild, start);
+                    else
+                        evaluate_error(node);
+
+                }
+                else
+                    evaluate_error(node);
+
+            }
+            else
+                evaluate_error(node)
+            break;
+        }
+        case (s_SIGN + t_SEMIC + 1):{
+            if(node->leftChild != NULL){
+
+                if(node->leftChild->label == t_PLUS || node->leftChild->label == t_PLUS_UNARY || node->leftChild->label == t_EPSILON)
+                    returnValue = 1.0;
+                else if(node->leftChild->label == t_MINUS || node->leftChild->label == t_MINUS_UNARY)
+                    returnValue = -1.0;
+                else
+                    evaluate_error(node);
+
+            }
+            else
+                evaluate_error(node);
+
+            break;
+        }
+        case (s_INCREMENT + t_SEMIC + 1){
+            if(node->leftChild != NULL){
+
+                if(node->leftChild->label == t_INCREMENT)
+                    returnValue = 1.0;
+                else if(node->leftChild->label == t_DECREMENT)
+                    returnValue = -1.0;
+                else if(node->leftChild->label == t_EPSILON)
+                    returnValue = 0.0;
+                else
+                    evaluate_error(node);
+
+            }
+            else
+                evaluate_error(node);
+
+            break;
+        }
+        case (s_FACTORTAIL + t_SEMIC + 1):{
+            if(node->leftChild != NULL){
+
+                if(node->leftChild->label == t_BANG)
+                    returnValue = factorial(start) - start;
+                else if(node->leftChild->label == t_CARET){
+
+                    if(node->leftChild->rightSibling != NULL && node->leftChild->rightSibling->label == (s_FACTOR + t_SEMIC + 1)){
+
+                        float f1 = evaluate(node->leftChild->rightSibling, start);
+                        returnValue = exponent(start, f1) - start;
+
+                    }
+                    else
+                        evaluate_error(node);
+
+                }
+                else if(node->leftChild->label == t_EPSILON)
+                    returnValue = 0.0;
+
+            }
+            else
+                evaluate_error(node);
+            break;
+        }
+        default:
+            evaluate_error(node);
+            returnValue =  0.0;
+            break;
+
+    }
+
+    return returnValue;
+
+}
+
 /********
     Scan source, identify structure, and print appropriately.
  ********/
@@ -826,36 +933,17 @@ void parse(){
 
     set_to_beginning(&loc);
 
-    //Creating the parse tree
-    node_t * root = malloc(sizeof(node_t));
-    root->label = s_EXPRESSION + t_SEMIC + 1;
-    root->hasChildren = 0;
-    root->parent = NULL;
-    root->leftChild = NULL;
-    root->rightSibling = NULL;
-    root->data = NULL;
-
-    //These macros will come in handy when we have to re-initialize
-    //the stack and tree between statements.       
-    #define INIT_TREE()                                         \
-        root = malloc(sizeof(node_t));                          \
-        root->label = s_EXPRESSION + t_SEMIC + 1;               \
-        root->hasChildren = 0;                                  \   
-        root->parent = NULL;                                    \
-        root->leftChild = NULL;                                 \
-        root->rightSibling = NULL;                              \
-        root->data = NULL;        
-
     scan(&loc, &tok);
     while(tok.tc != T_EOF){
         
         //recurse for statement HERE;
         if(tok.tc != T_EOF && tok.tc != T_SPACE && tok.tc != T_NL_SPACE){
             
-            root = pExpression();
+            node_t * root = pExpression();
             printf("\n");
             char * indent = " ";
             printNode(root, indent, 1, 1);
+            //deleteNode(root);
 
         }
         else
@@ -863,6 +951,19 @@ void parse(){
             findNextInput();
         
     }
+
+}
+
+int adeebRound(float target){
+
+    float tenthsPlace = (target*10.0) - (float) (((int)target)*10);
+
+    int returnValue = (int) target;
+
+    if(tenthsPlace >= 5.0 && target > (float)((int)target))
+        returnValue++;
+
+    return returnValue;
 
 }
 
@@ -1024,17 +1125,178 @@ void printLabel(node_t * node){
 
 }
 
+void printNodeError(node_t *node, char * indent, int length, int last){
+    //Based on C# Example Code
+    //from this stackoverflow thread:
+    //http://stackoverflow.com/questions/1649027/how-do-i-print-out-a-tree-structure
+
+    int i;
+    char * newIndent = malloc(sizeof(char)*(length + 4));
+
+    fprintf(stderr, "%s", indent);
+
+    if(last){
+
+        fprintf(stderr, "\\--");
+        
+        for(i = 0; i < length; i++){
+            if(indent[i] == '\0')
+                break;
+            else
+                newIndent[i] = indent[i];
+        }
+        newIndent[length] = ' ';
+        newIndent[length+1] = ' ';
+        newIndent[length+2] = ' ';
+        newIndent[length+3] = '\0';
+
+        length = length + 3;
+
+    }
+    else{
+
+        fprintf(stderr, "|--");
+
+        for(i = 0; i < length; i++){
+            if(indent[i] == '\0')
+                break;
+            else
+                newIndent[i] = indent[i];
+        }
+        newIndent[length] = '|';
+        newIndent[length+1] = ' ';
+        newIndent[length+2] = ' ';
+        newIndent[length+3] = '\0';
+
+        length = length + 3;
+
+    }
+    printLabelError(node);
+
+    node_t * currNode = node->leftChild;
+    while(currNode != NULL){
+
+        if(currNode->rightSibling == NULL){
+
+            printNode(currNode, newIndent, length, 1);
+            break;
+
+        }
+        else{
+
+            printNode(currNode, newIndent, length, 0);
+            currNode = currNode->rightSibling;
+
+        }
+
+    }
+
+
+}
+
+void printLabelError(node_t * node){
+
+    switch(node->label){
+
+        case t_PLUS:
+            fprintf(stderr, "{+}\n");
+            break;
+        case t_MINUS:
+            fprintf(stderr, "{-}\n");
+            break;
+        case t_PLUS_UNARY:
+            fprintf(stderr, "{(+)}\n");
+            break;
+        case t_MINUS_UNARY:
+            fprintf(stderr, "{(-)}\n");
+            break;
+        case t_INCREMENT:
+            fprintf(stderr, "{(++)}\n");
+            break;
+        case t_DECREMENT:
+            fprintf(stderr, "{(--)}\n");
+            break;
+        case t_STAR:
+            fprintf(stderr, "{*}\n");
+            break;
+        case t_PCT:
+            fprintf(stderr, "{%%}\n");
+            break;
+        case t_SLASH:
+            fprintf(stderr, "{/}\n");
+            break;
+        case t_LPAREN:
+            fprintf(stderr, "{(}\n");
+            break;
+        case t_RPAREN:
+            fprintf(stderr, "{)}\n");
+            break;
+        case t_BANG:
+            fprintf(stderr, "{!}\n");
+            break;
+        case t_CARET:
+            fprintf(stderr, "{^}\n");
+            break;
+        case t_LITERAL:
+            fprintf(stderr, "{%s}\n", node->data);
+            break;
+        case t_EPSILON:
+            fprintf(stderr, "{e}\n");
+            break;
+        case t_SEMIC:
+            fprintf(stderr, "{;}\n");
+            break;
+        case (s_EXPRESSION + t_SEMIC + 1):
+            fprintf(stderr, "{<E>}\n");
+            break;
+        case (s_EXPTAIL + t_SEMIC + 1):
+            fprintf(stderr, "{<ET>}\n");
+            break;
+        case (s_POSTINCREMENT + t_SEMIC + 1):
+            fprintf(stderr, "{<PI>}\n");
+            break;
+        case (s_TERM + t_SEMIC + 1):
+            fprintf(stderr, "{<T>}\n");
+            break;
+        case (s_TERMTAIL + t_SEMIC + 1):
+            fprintf(stderr, "{<TT>}\n");
+            break;
+        case (s_FACTOR + t_SEMIC + 1):
+            fprintf(stderr, "{<F>}\n");
+            break;
+        case (s_FACTORHEAD + t_SEMIC + 1):
+            fprintf(stderr, "{<FH>}\n");
+            break;
+        case (s_SIGN + t_SEMIC + 1):
+            fprintf(stderr, "{<S>}\n");
+            break;
+        case (s_INCREMENT + t_SEMIC + 1):
+            fprintf(stderr, "{<I>}\n");
+            break;
+        case (s_FACTORTAIL + t_SEMIC + 1):
+            fprintf(stderr, "{<FT>}\n");
+            break;
+        default:
+            break;
+
+    }
+
+}
+
 void deleteNode(node_t *node){
 
     //Iterates through all the the branches
-    //and then clears the lines from memory.
-    if(node) {
+    //and then clears the nodes from memory.
+    if(node != NULL) {
 
-        if(node->leftChild)
+        printf("CALL: %d ", node->label);
+        if(node->leftChild != NULL)
             deleteNode(node->leftChild);
-        if(node->rightSibling)
+        if(node->rightSibling != NULL)
             deleteNode(node->rightSibling);
+        printf("FREE: %d \n", node->label);
         free(node);
+        node = NULL;
 
     }
 

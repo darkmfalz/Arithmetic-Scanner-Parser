@@ -68,12 +68,18 @@ node_t * pSign();
 node_t * pIncrement();
 node_t * pFactorTail();
 
+float evaluate(node_t *node, float start);
+
 void parse();
     /* Scan source, identify structure, and print appropriately. */
+
+int adeebRound(float target);
 
 //print functions
 void printNode(node_t *node, char * indent, int length, int last);
 void printLabel(node_t * node);
+void printNodeError(node_t *node, char * indent, int length, int last);
+void printLabelError(node_t * node);
 
 //delete functions
 void deleteNode(node_t *node);
