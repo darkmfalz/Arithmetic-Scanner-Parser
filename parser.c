@@ -175,6 +175,9 @@ node_t * pExpression(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_EXPRESSION + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -207,6 +210,9 @@ node_t * pExpTail(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_EXPTAIL + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -260,6 +266,9 @@ node_t * pPostIncrement(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_POSTINCREMENT + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -267,10 +276,13 @@ node_t * pPostIncrement(){
         case t_INCREMENT:
         case t_DECREMENT:{
             node_t *node1 = pIncrement();
+            node_t *node2 = pIncTail();
             addNode(node1, returnNode);
+            addNode(node2, returnNode);
             break;
         }
         default:
+
             printf("jane");
             parse_error();
             break;
@@ -284,6 +296,9 @@ node_t * pTerm(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_TERM + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -316,6 +331,9 @@ node_t * pTermTail(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_TERMTAIL + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -376,6 +394,9 @@ node_t * pFactor(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_FACTOR + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -408,6 +429,9 @@ node_t * pFactorHead(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_FACTORHEAD + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -465,6 +489,9 @@ node_t * pSign(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_SIGN + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -509,6 +536,9 @@ node_t * pIncrement(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_INCREMENT + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -551,6 +581,9 @@ node_t * pFactorTail(){
 
     node_t * returnNode = malloc(sizeof(node_t));
     returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
     returnNode->label = s_FACTORTAIL + t_SEMIC + 1;
 
     switch(tok.terminal){
@@ -586,6 +619,48 @@ node_t * pFactorTail(){
         }
         default:
             printf("rachel");
+            parse_error();
+            break;
+
+    }
+
+    return returnNode;
+
+}
+
+node_t * pIncTail(){
+
+    node_t * returnNode = malloc(sizeof(node_t));
+    returnNode->data = NULL;
+    returnNode->parent = NULL;
+    returnNode->leftChild = NULL;
+    returnNode->rightSibling = NULL;
+    returnNode->label = s_INCTAIL + t_SEMIC + 1;
+
+    switch(tok.terminal){
+
+        case t_STAR:
+        case t_SLASH:
+        case t_PCT:{
+            node_t *node1 = pTermTail();
+            addNode(node1, returnNode);
+            break;
+        }
+        case t_BANG:
+        case t_CARET:{
+            node_t *node1 = pFactorTail();
+            addNode(node1, returnNode);
+            break;
+        }
+        case t_PLUS:
+        case t_MINUS:
+        case t_RPAREN:
+        case t_SEMIC:{
+            addNodeLabel(t_EPSILON, returnNode);
+            break;
+        }
+        default:
+            printf("jane");
             parse_error();
             break;
 
@@ -696,22 +771,7 @@ float evaluate(node_t *node, float start){
 
                     float f2 = evaluate(node->leftChild->rightSibling, start);
 
-                    if(node->parent != NULL){
-
-                        if(node->parent->rightSibling != NULL && node->parent->rightSibling->label == t_RPAREN){
-
-                            if(f1 == 1.0 || f1 == -1.0 || f1 == 0.0)
-                                returnValue = f1 + f2;
-                            else
-                                evaluate_error(node);
-
-                        }
-                        else
-                            returnValue = f2;
-
-                    }
-                    else
-                        evaluate_error(node);
+                    returnValue = f1 + f2;
 
                 }
                 //or else it's an epsilon or error
@@ -729,8 +789,17 @@ float evaluate(node_t *node, float start){
             break;
         }
         case (s_POSTINCREMENT + t_SEMIC + 1):{
-            if(node->leftChild != NULL)
-                returnValue = evaluate(node->leftChild, start);
+            if(node->leftChild != NULL && node->leftChild->rightSibling != NULL){
+
+                float f1 = evaluate(node->leftChild, start);
+                float f2 = evaluate(node->leftChild->rightSibling, start);
+
+                if(node->parent->parent->rightSibling != NULL && node->parent->parent->rightSibling->label == t_RPAREN && node->leftChild->rightSibling->leftChild != NULL && node->leftChild->rightSibling->leftChild->label == t_EPSILON)
+                    returnValue = f1;
+                else
+                    returnValue = f2;
+
+            }
             else
                 evaluate_error(node);
             break;
@@ -739,7 +808,7 @@ float evaluate(node_t *node, float start){
             if(node->leftChild != NULL && node->leftChild->rightSibling != NULL){
                 float f1 = evaluate(node->leftChild, start);
                 float f2 = evaluate(node->leftChild->rightSibling, f1);
-                returnValue = f1 * f2;
+                returnValue = f1 + f2;
             }
             else
                 evaluate_error(node);
@@ -753,25 +822,25 @@ float evaluate(node_t *node, float start){
                 if(node->leftChild->rightSibling != NULL && node->leftChild->rightSibling->rightSibling != NULL){
 
                     float f2 = evaluate(node->leftChild->rightSibling, start);
-                    float f3 = evaluate(node->leftChild->rightSibling->rightSibling, start*f2);
+                    float f3;
 
                     if(f1 == (float)t_STAR){
 
                         f3 = evaluate(node->leftChild->rightSibling->rightSibling, start*f2);
-                        returnValue = f2 * f3;
+                        returnValue = start*f2 - start + f3;
 
                     }
                     else if(f1 == (float)t_SLASH){
 
                         f3 = evaluate(node->leftChild->rightSibling->rightSibling, start/f2);
-                        returnValue = 1/f2 * f3;
+                        returnValue = start/f2 - start + f3;
 
                     }
                     else if(f1 == (float)t_PCT){
 
                         f3 = evaluate(node->leftChild->rightSibling->rightSibling, (float)(adeebRound(start) % adeebRound(f2)));
                         if(start != 0.0)
-                            returnValue = ((float)(adeebRound(start) % adeebRound(f2)))/start * f3;
+                            returnValue = ((float)(adeebRound(start) % adeebRound(f2))) - start + f3;
                         else
                             returnValue = 0.0;
 
@@ -783,7 +852,7 @@ float evaluate(node_t *node, float start){
                 //or else it's an epsilon or error
                 else{
                     if(f1 == (float)t_EPSILON)
-                        returnValue = 1;
+                        returnValue = 0.0;
                     else
                         evaluate_error(node);
                 }
@@ -912,6 +981,17 @@ float evaluate(node_t *node, float start){
                 evaluate_error(node);
             break;
         }
+        case (s_INCTAIL + t_SEMIC + 1):{
+            if(node->leftChild != NULL){
+                if(node->leftChild->label == t_EPSILON)
+                    returnValue = 0;
+                else
+                    returnValue = evaluate(node->leftChild, start);
+            }
+            else
+                evaluate_error(node);
+            break;
+        }
         default:
             evaluate_error(node);
             returnValue =  0.0;
@@ -943,6 +1023,7 @@ void parse(){
             
             node_t * root = pExpression();
             printf("\n");
+            //printNode(root, " ", 1, 1);
             float eval = evaluate(root, 1);
             if(isInt){
 
@@ -1127,6 +1208,8 @@ void printNode(node_t *node, char * indent, int length, int last){
     }
     printLabel(node);
 
+    if(node->leftChild == NULL)
+        return;
     node_t * currNode = node->leftChild;
     while(currNode != NULL){
 
@@ -1229,6 +1312,9 @@ void printLabel(node_t * node){
             break;
         case (s_FACTORTAIL + t_SEMIC + 1):
             printf("{<FT>}\n");
+            break;
+        case (s_INCTAIL + t_SEMIC + 1):
+            printf("{<IT>}\n");
             break;
         default:
             break;
@@ -1387,6 +1473,9 @@ void printLabelError(node_t * node){
             break;
         case (s_FACTORTAIL + t_SEMIC + 1):
             fprintf(stderr, "{<FT>}\n");
+            break;
+        case (s_INCTAIL + t_SEMIC + 1):
+            fprintf(stderr, "{<IT>}\n");
             break;
         default:
             break;

@@ -37,7 +37,8 @@ typedef enum {
 	s_FACTORHEAD,
 	s_SIGN,
 	s_INCREMENT,
-	s_FACTORTAIL
+	s_FACTORTAIL,
+	s_INCTAIL
 
 } syntactic_group_class;
 
@@ -67,6 +68,7 @@ node_t * pFactorHead();
 node_t * pSign();
 node_t * pIncrement();
 node_t * pFactorTail();
+node_t * pIncTail();
 
 float evaluate(node_t *node, float start);
 
